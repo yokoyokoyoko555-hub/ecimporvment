@@ -1,0 +1,1 @@
+export default function SettingsPage(){return <><header className="topline"><div><div className="eyebrow">Settings</div><h1>運用設定</h1><p className="subtitle">商品コード、カテゴリ、部門、説明文の規則を管理します。</p></div></header><section className="panel"><div className="empty"><h3>設定マスタ</h3><p>PostgreSQL接続後に設定項目を表示します。</p></div></section></>}

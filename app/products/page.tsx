@@ -1,0 +1,1 @@
+export default function ProductsPage(){return <><header className="topline"><div><div className="eyebrow">Products</div><h1>商品編集</h1><p className="subtitle">取得したカードを販売商品として編集します。</p></div></header><section className="panel"><div className="empty"><h3>商品を選択してください</h3><p>取込管理から商品セットを取得すると、ここで一括編集できます。</p></div></section></>}

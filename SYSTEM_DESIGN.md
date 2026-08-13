@@ -89,14 +89,15 @@ flowchart LR
     H --> K["スマレジCSV"]
 ```
 
-### 推奨技術構成
+### 採用技術構成
 
-- Webアプリケーション：Next.js + TypeScript
-- DB：PostgreSQL（小規模な試作のみSQLite可）
-- バックグラウンド処理：ジョブキュー方式
+- 配置先：Railway（Dockerfileは原則使用せずRailpackでビルド）
+- Webアプリケーション：Next.js + TypeScript（Railway Web Service）
+- DB：Railway PostgreSQL
+- バックグラウンド処理：Railway Worker Service＋ジョブキュー方式
 - スクレイピング：HTTP取得＋HTML解析を基本とし、JavaScript描画が必要なサイトのみブラウザ自動化
-- 画像保存：ローカル／オブジェクトストレージ
-- 配置：社内PCまたはクラウド。複数人利用する場合はクラウドを推奨
+- 画像・CSV・ZIP保存：Railway Storage Bucket（S3互換）
+- ソース管理・自動配置：GitHubからRailwayへ自動デプロイ
 
 フレームワークは実装時に変更可能だが、「取得」「正規化」「商品編集」「出力」を分離する構造は維持する。
 
@@ -454,4 +455,3 @@ stateDiagram-v2
 | 3 | おちゃのこ／スマレジCSV、画像ZIP、履歴 |
 | 4 | 実サービスへの少数テスト投入と調整 |
 | 5 | 他メーカー用アダプターの追加 |
-
