@@ -21,6 +21,8 @@ export async function POST(request: Request) {
   const client = await pool.connect();
   let batchId: string | undefined;
   try {
+    const existing = await client.query<{ id: string }>("SELECT id FROM import_batches WHERE source_url=$1 AND set_code=$2 AND status<>'failed' ORDER BY created_at DESC LIMIT 1", [sourceUrl, setCode]);
+    if (existing.rows[0]) return NextResponse.json({ error: "同じ商品セットは既に取り込まれています", existingId: existing.rows[0].id }, { status: 409 });
     const batch = await client.query<{ id: string }>(`INSERT INTO import_batches(source_url,set_name,set_code,status)
       VALUES($1,$2,$3,'fetching') RETURNING id`, [sourceUrl, setName, setCode]);
     batchId = batch.rows[0].id;

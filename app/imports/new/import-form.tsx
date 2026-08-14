@@ -13,6 +13,7 @@ export function ImportForm() {
     try {
       const response = await fetch("/api/imports/digimon", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceUrl: formData.get("sourceUrl"), setName: formData.get("setName"), setCode: formData.get("setCode") }) });
       const result = await response.json();
+      if (response.status === 409 && result.existingId) { setMessage("取込済みの商品セットを開きます。"); router.push(`/imports/${result.existingId}`); return; }
       if (!response.ok) throw new Error(result.error || "取込に失敗しました");
       setMessage(`${result.cardCount}件を取得しました。取込一覧へ移動します。`);
       router.push("/imports"); router.refresh();
