@@ -21,10 +21,10 @@ export async function POST(request: Request) {
   const client = await pool.connect();
   let batchId: string | undefined;
   try {
-    const existing = await client.query<{ id: string }>("SELECT id FROM import_batches WHERE source_url=$1 AND set_code=$2 AND status<>'failed' ORDER BY created_at DESC LIMIT 1", [sourceUrl, setCode]);
+    const existing = await client.query<{ id: string }>("SELECT id FROM import_batches WHERE source_type='digimon' AND lower(trim(set_code))=lower(trim($1)) AND status<>'failed' ORDER BY created_at ASC LIMIT 1", [setCode]);
     if (existing.rows[0]) return NextResponse.json({ error: "同じ商品セットは既に取り込まれています", existingId: existing.rows[0].id }, { status: 409 });
-    const batch = await client.query<{ id: string }>(`INSERT INTO import_batches(source_url,set_name,set_code,status)
-      VALUES($1,$2,$3,'fetching') RETURNING id`, [sourceUrl, setName, setCode]);
+    const batch = await client.query<{ id: string }>(`INSERT INTO import_batches(source_type,source_url,set_name,set_code,status)
+      VALUES('digimon',$1,$2,$3,'fetching') RETURNING id`, [sourceUrl, setName, setCode]);
     batchId = batch.rows[0].id;
     const cards = await fetchDigimonCards(sourceUrl);
     const templateResult = await client.query<{ template_text: string; multiple_colors_label: string | null }>("SELECT template_text,multiple_colors_label FROM product_name_templates WHERE title_key='digimon'");
@@ -48,6 +48,10 @@ export async function POST(request: Request) {
   } catch (error) {
     await client.query("ROLLBACK").catch(() => undefined);
     if (batchId) await client.query(`UPDATE import_batches SET status='failed',error_message=$1,updated_at=now() WHERE id=$2`, [error instanceof Error ? error.message : "取込に失敗しました", batchId]).catch(() => undefined);
+    if (error instanceof Error && "code" in error && error.code === "23505") {
+      const existing = await client.query<{ id: string }>("SELECT id FROM import_batches WHERE source_type='digimon' AND lower(trim(set_code))=lower(trim($1)) AND status<>'failed' ORDER BY created_at ASC LIMIT 1", [setCode]).catch(() => ({ rows: [] as { id: string }[] }));
+      return NextResponse.json({ error: "同じ商品セットは既に取り込まれています", existingId: existing.rows[0]?.id }, { status: 409 });
+    }
     console.error(error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "取込に失敗しました" }, { status: 500 });
   } finally {
