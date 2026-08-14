@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import "./sidebar.css";
 
 export const metadata: Metadata = { title: "CardFlow", description: "トレーディングカード商品登録支援" };
 
