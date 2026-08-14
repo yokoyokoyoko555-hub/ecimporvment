@@ -2,6 +2,8 @@ import Link from "next/link";
 import { dashboardCounts, listBatches } from "@/lib/repository";
 import { hasDatabase } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 const labels: Record<string, string> = { needs_review: "要確認", ready: "出力可能", draft: "下書き", fetching: "取得中", failed: "失敗", exported: "出力済み" };
 
 export default async function Dashboard() {
