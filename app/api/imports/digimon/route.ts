@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { pool } from "@/lib/db";
 import { fetchDigimonCards } from "@/lib/digimon";
+import { DEFAULT_PRODUCT_NAME_TEMPLATES, renderProductName } from "@/lib/product-name";
 
 const inputSchema = z.object({
   sourceUrl: z.string().url(),
@@ -24,6 +25,8 @@ export async function POST(request: Request) {
       VALUES($1,$2,$3,'fetching') RETURNING id`, [sourceUrl, setName, setCode]);
     batchId = batch.rows[0].id;
     const cards = await fetchDigimonCards(sourceUrl);
+    const templateResult = await client.query<{ template_text: string; multiple_colors_label: string | null }>("SELECT template_text,multiple_colors_label FROM product_name_templates WHERE title_key='digimon'");
+    const template = templateResult.rows[0] ? { templateText: templateResult.rows[0].template_text, multipleColorsLabel: templateResult.rows[0].multiple_colors_label } : DEFAULT_PRODUCT_NAME_TEMPLATES.digimon;
 
     await client.query("BEGIN");
     for (const card of cards) {
@@ -33,8 +36,7 @@ export async function POST(request: Request) {
         [batchId, card.sourceKey, card.cardNumber, card.variationCode, card.rarity, card.cardType, card.level, card.isParallel, card.cardName, card.colors, card.playCost, card.dp, card.form, card.attribute, card.traits, card.upperText, card.lowerText, card.imageUrl, JSON.stringify(card)]);
       const suffix = card.variationCode === "N" ? "N" : card.variationCode;
       const productCode = `DG_${card.cardNumber}_${suffix}`.replace(/[^A-Za-z0-9_-]/g, "");
-      const parallel = card.isParallel ? "【パラレル】" : "";
-      const productName = `${card.cardName} 【${card.rarity || "-"}】${parallel}【${card.colors.join("・") || "-"}】【${card.cardNumber}】【${setCode}】`;
+      const productName = renderProductName(template, { name: card.cardName, rarity: card.rarity, colors: card.colors, cardNumber: card.cardNumber, setCode, isParallel: card.isParallel });
       await client.query(`INSERT INTO products(card_id,product_code,product_name,image_file_name)
         VALUES($1,$2,$3,$4) ON CONFLICT(product_code) DO NOTHING`, [inserted.rows[0].id, productCode, productName, card.imageUrl ? `${card.sourceKey}.png` : null]);
     }
