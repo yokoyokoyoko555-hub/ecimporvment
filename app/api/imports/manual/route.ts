@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { pool } from "@/lib/db";
 import { renderProductName } from "@/lib/product-name";
+import { resolveProductCode } from "@/lib/product-code";
 
 const cardSchema = z.object({
   cardName: z.string().trim().min(1, "カード名を入力してください").max(200),
@@ -10,7 +11,7 @@ const cardSchema = z.object({
   colors: z.array(z.string().trim().min(1).max(30)).max(10).default([]),
   isParallel: z.boolean().default(false),
   imageUrl: z.union([z.string().url("画像URLを確認してください"), z.literal("")]).nullable().optional(),
-  productCode: z.string().trim().min(1, "商品コードを入力してください").max(100).regex(/^[A-Za-z0-9_-]+$/, "商品コードは半角英数字・ハイフン・アンダーバーで入力してください"),
+  productCode: z.string().trim().max(100).regex(/^[A-Za-z0-9_-]*$/, "商品コードは半角英数字・ハイフン・アンダーバーで入力してください").optional(),
   productName: z.string().trim().max(300).optional(),
   salePrice: z.number().int().min(0).nullable().optional(),
   costPrice: z.number().int().min(0).nullable().optional(),
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
 
     for (let index = 0; index < parsed.data.cards.length; index += 1) {
       const card = parsed.data.cards[index];
+      const productCode = await resolveProductCode(client, parsed.data.titleKey, card.cardNumber, card.productCode);
       const variationCode = card.isParallel ? "P" : "N";
       const sourceKey = `manual-${card.cardNumber}-${variationCode}-${index + 1}`;
       const cardResult = await client.query<{ id: string }>(`INSERT INTO cards(
@@ -63,9 +65,9 @@ export async function POST(request: Request) {
       await client.query(`INSERT INTO products(
         card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, image_file_name)
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [
-        cardResult.rows[0].id, card.productCode, card.productName || generatedName,
+        cardResult.rows[0].id, productCode, card.productName || generatedName,
         card.salePrice ?? null, card.costPrice ?? null, card.initialStock,
-        card.departmentId || null, card.category || null, card.imageUrl ? `${card.productCode}.jpg` : null,
+        card.departmentId || null, card.category || null, card.imageUrl ? `${productCode}.jpg` : null,
       ]);
     }
     await client.query("COMMIT");

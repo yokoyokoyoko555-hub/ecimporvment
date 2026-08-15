@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { pool } from "@/lib/db";
 import { ManualImportForm, type ManualTemplate } from "./manual-import-form";
 import "./manual.css";
+import "./manual-code.css";
 
 export const dynamic = "force-dynamic";
 
