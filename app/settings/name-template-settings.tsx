@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { renderProductName } from "@/lib/product-name";
 
 export type TemplateItem = { titleKey: string; displayName: string; templateText: string; multipleColorsLabel: string | null };
 const newItem = (): TemplateItem => ({ titleKey: "", displayName: "", templateText: "{{name}}【{{rarity}}】【{{color}}】【{{card_number}}】", multipleColorsLabel: null });
 
 export function NameTemplateSettings({ initialItems }: { initialItems: TemplateItem[] }) {
+  const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [message, setMessage] = useState<string | null>(null);
   const previews = useMemo(() => items.map((item) => renderProductName(item, { name: "カード名", rarity: "SR", cardNumber: "XX01-001", colors: ["赤", "青"] })), [items]);
@@ -20,6 +22,7 @@ export function NameTemplateSettings({ initialItems }: { initialItems: TemplateI
     const response = await fetch("/api/settings/name-templates", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(item) });
     const result = await response.json();
     setMessage(response.ok ? `${item.displayName}の商品名テンプレートを保存しました。` : result.error || "保存に失敗しました");
+    if (response.ok) router.refresh();
   }
 
   return <section className="panel">

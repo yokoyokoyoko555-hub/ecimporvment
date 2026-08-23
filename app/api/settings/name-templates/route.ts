@@ -23,5 +23,7 @@ export async function PUT(request: Request) {
   await pool.query(`INSERT INTO product_name_templates(title_key,display_name,template_text,multiple_colors_label) VALUES($1,$2,$3,$4)
     ON CONFLICT(title_key) DO UPDATE SET display_name=EXCLUDED.display_name,template_text=EXCLUDED.template_text,multiple_colors_label=EXCLUDED.multiple_colors_label,updated_at=now()`,
     [value.titleKey, value.displayName, value.templateText, value.multipleColorsLabel || null]);
+  await pool.query(`INSERT INTO catalog_sources(title_key,source_name,acquisition_method,active) VALUES($1,'手動登録','manual',true)
+    ON CONFLICT(title_key) DO NOTHING`, [value.titleKey]);
   return NextResponse.json({ ok: true });
 }
