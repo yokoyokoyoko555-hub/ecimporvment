@@ -6,7 +6,7 @@ export type CatalogSourceItem = {
   displayName: string;
   sourceName: string;
   acquisitionMethod: "manual" | "scraping";
-  scraperKey: "digimon" | "onepiece" | null;
+  scraperKey: "digimon" | "onepiece" | "lorcana" | null;
   defaultUrl: string;
   active: boolean;
 };
@@ -125,6 +125,9 @@ export function CatalogSourceSettings({
                         </option>
                         <option value="onepiece">
                           ONE PIECEカードゲーム公式（対応済み）
+                        </option>
+                        <option value="lorcana">
+                          ディズニー・ロルカナ公式（対応済み）
                         </option>
                       </select>
                     </div>

@@ -39,16 +39,24 @@ export function ProductEditor({
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const rarityOrder = [
+    "アイコニック",
+    "エンチャンテッド",
+    "エピック",
     "スーパーパラレル",
     "SEC",
     "SP",
+    "レジェンダリー",
     "リーダーパラレル",
     "パラレル",
     "L",
+    "スーパーレア",
     "SR",
+    "レア",
     "R",
+    "アンコモン",
     "UC",
     "U",
+    "コモン",
     "C",
     "P",
   ];

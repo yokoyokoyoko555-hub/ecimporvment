@@ -184,7 +184,9 @@ export function NameTemplateSettings({
                 >
                   保存
                 </button>
-                {!["onepiece", "digimon"].includes(item.titleKey) && (
+                {!["onepiece", "digimon", "lorcana"].includes(
+                  item.titleKey,
+                ) && (
                   <button
                     className="button dangerButton"
                     type="button"

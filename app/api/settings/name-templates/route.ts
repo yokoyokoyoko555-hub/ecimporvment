@@ -88,7 +88,7 @@ export async function DELETE(request: Request) {
       { error: "削除対象が正しくありません" },
       { status: 400 },
     );
-  if (["onepiece", "digimon"].includes(parsed.data.titleKey))
+  if (["onepiece", "digimon", "lorcana"].includes(parsed.data.titleKey))
     return NextResponse.json(
       { error: "標準タイトルは削除できません" },
       { status: 409 },
