@@ -15,7 +15,7 @@ export interface EditableProduct {
   productName: string;
   salePrice: number | null;
   costPrice: number | null;
-  initialStock: number;
+  initialStock: number | null;
   departmentId: string;
   category: string;
   exportEnabled: boolean;
@@ -80,11 +80,7 @@ export function ProductEditor({
     damagedTargets.every((product) => product.createDamaged);
   const invalid = products.filter(
     (product) =>
-      product.exportEnabled &&
-      (product.salePrice === null ||
-        !product.departmentId ||
-        !product.category ||
-        !product.productCode),
+      product.exportEnabled && (!product.category || !product.productCode),
   ).length;
 
   function update(
@@ -155,7 +151,7 @@ export function ProductEditor({
         return;
       }
       setMessage(
-        `${targets.length}件を保存しました。未入力 ${result.missing}件です。`,
+        `${targets.length}件を保存しました。おちゃのこ必須項目の未入力 ${result.missing}件です。`,
       );
     } finally {
       setSaving(false);
@@ -181,7 +177,9 @@ export function ProductEditor({
           <option value="rarity-asc">レアリティ順（低い順）</option>
         </select>
         <span className={invalid ? "validationBad" : "validationGood"}>
-          {invalid ? `未入力 ${invalid}件` : "出力必須項目 OK"}
+          {invalid
+            ? `おちゃのこ必須項目 未入力 ${invalid}件`
+            : "おちゃのこCSV出力 OK"}
         </span>
         <button className="button" disabled={saving} onClick={saveAll}>
           {saving ? "保存中…" : "すべて保存"}
@@ -295,12 +293,14 @@ export function ProductEditor({
                   <input
                     type="number"
                     min="0"
-                    value={product.initialStock}
+                    value={product.initialStock ?? ""}
                     onChange={(event) =>
                       update(
                         product.sourceKey,
                         "initialStock",
-                        Number(event.target.value),
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
                       )
                     }
                   />

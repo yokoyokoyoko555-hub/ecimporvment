@@ -41,7 +41,7 @@ const emptyCard = (): CardInput => ({
   productCode: "",
   productName: "",
   salePrice: "",
-  initialStock: "0",
+  initialStock: "",
   departmentId: "",
   category: "",
 });
@@ -143,7 +143,8 @@ export function ManualImportForm({
             : card.productCode || undefined,
         productName: card.productName || undefined,
         salePrice: card.salePrice === "" ? null : Number(card.salePrice),
-        initialStock: Number(card.initialStock || 0),
+        initialStock:
+          card.initialStock === "" ? null : Number(card.initialStock),
         departmentId: card.departmentId || null,
         category: card.category || setName.replace(/\s+【/g, "【").trim(),
       })),

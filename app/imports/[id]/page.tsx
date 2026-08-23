@@ -64,7 +64,7 @@ export default async function Page({
     productName: row.product_name || row.card_name,
     salePrice: row.sale_price,
     costPrice: row.cost_price,
-    initialStock: row.initial_stock || 0,
+    initialStock: row.initial_stock,
     departmentId: row.department_id || "",
     category: row.category || defaultCategory,
     exportEnabled: row.export_enabled ?? true,

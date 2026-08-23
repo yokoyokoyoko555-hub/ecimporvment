@@ -27,7 +27,7 @@ const cardSchema = z.object({
   productName: z.string().trim().max(300).optional(),
   salePrice: z.number().int().min(0).nullable().optional(),
   costPrice: z.number().int().min(0).nullable().optional(),
-  initialStock: z.number().int().min(0).default(0),
+  initialStock: z.number().int().min(0).nullable().default(null),
   departmentId: z.string().trim().max(50).nullable().optional(),
   category: z.string().trim().max(200).nullable().optional(),
 });
@@ -172,7 +172,7 @@ export async function POST(request: Request) {
         await client.query(
           `INSERT INTO products(
           card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, image_file_name)
-          VALUES($1,$2,$3,NULL,NULL,0,$4,$5,$6)`,
+          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6)`,
           [
             damagedCard.rows[0].id,
             damagedCode,

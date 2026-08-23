@@ -1,0 +1,2 @@
+ALTER TABLE products ALTER COLUMN initial_stock DROP NOT NULL;
+ALTER TABLE products ALTER COLUMN initial_stock DROP DEFAULT;
