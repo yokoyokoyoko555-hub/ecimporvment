@@ -26,7 +26,7 @@ export default async function SettingsPage() {
       (SELECT count(*)::text FROM legacy_product_codes) reserved_count
       FROM product_code_rules r WHERE r.title_key='onepiece'`);
     codeRule = ruleResult.rows[0] || null;
-    const sourceResult = await pool.query<{ title_key: string; display_name: string; source_name: string | null; acquisition_method: "manual" | "scraping" | null; scraper_key: "digimon" | null; default_url: string | null; active: boolean | null }>(`SELECT t.title_key,t.display_name,s.source_name,s.acquisition_method,s.scraper_key,s.default_url,s.active
+    const sourceResult = await pool.query<{ title_key: string; display_name: string; source_name: string | null; acquisition_method: "manual" | "scraping" | null; scraper_key: "digimon" | "onepiece" | null; default_url: string | null; active: boolean | null }>(`SELECT t.title_key,t.display_name,s.source_name,s.acquisition_method,s.scraper_key,s.default_url,s.active
       FROM product_name_templates t LEFT JOIN catalog_sources s ON s.title_key=t.title_key ORDER BY t.created_at`);
     sources = sourceResult.rows.map((row) => ({ titleKey: row.title_key, displayName: row.display_name, sourceName: row.source_name || "手動登録", acquisitionMethod: row.acquisition_method || "manual", scraperKey: row.scraper_key, defaultUrl: row.default_url || "", active: row.active ?? true }));
   }

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./import-form.css";
 
-export type ImportSource = { titleKey: string; displayName: string; sourceName: string; scraperKey: "digimon"; defaultUrl: string };
+export type ImportSource = { titleKey: string; displayName: string; sourceName: string; scraperKey: "digimon" | "onepiece"; defaultUrl: string };
 
 export function ImportForm({ sources }: { sources: ImportSource[] }) {
   const router = useRouter();
@@ -20,7 +20,7 @@ export function ImportForm({ sources }: { sources: ImportSource[] }) {
     submitting.current = true;
     setLoading(true); setMessage("公式サイトからカード情報を取得しています…");
     try {
-      const endpoint = selected?.scraperKey === "digimon" ? "/api/imports/digimon" : null;
+      const endpoint = selected?.scraperKey === "digimon" ? "/api/imports/digimon" : selected?.scraperKey === "onepiece" ? "/api/imports/onepiece" : null;
       if (!endpoint) throw new Error("この取得元のスクレイパーは未対応です");
       const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sourceUrl: formData.get("sourceUrl"), setName: formData.get("setName"), setCode: formData.get("setCode") }) });
       const result = await response.json();

@@ -6,7 +6,7 @@ const schema = z.object({
   titleKey: z.string().trim().min(2).max(40),
   sourceName: z.string().trim().min(1).max(100),
   acquisitionMethod: z.enum(["manual", "scraping"]),
-  scraperKey: z.enum(["digimon"]).nullable(),
+  scraperKey: z.enum(["digimon", "onepiece"]).nullable(),
   defaultUrl: z.union([z.string().url(), z.literal("")]).nullable(),
   active: z.boolean(),
 }).superRefine((value, context) => {
