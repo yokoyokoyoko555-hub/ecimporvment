@@ -1,1 +1,133 @@
-.manualForm{display:grid;gap:24px}.manualBatchFields{display:grid;grid-template-columns:1fr 2fr 1fr;gap:16px;padding:22px}.field select{border:1px solid #cfd8d4;border-radius:9px;padding:11px 12px;font:inherit;background:white}.manualListHeader{display:flex;align-items:center;justify-content:space-between}.manualListHeader h2{margin:0 0 4px}.manualCards{display:grid;gap:14px}.manualCard{background:white;border:1px solid var(--line);border-radius:14px;overflow:hidden}.manualCard summary{display:grid;grid-template-columns:minmax(180px,.7fr) 1.3fr;gap:24px;align-items:center;padding:18px 22px;cursor:pointer;list-style:none}.manualCard summary::-webkit-details-marker{display:none}.manualCard summary>span{display:flex;gap:10px;align-items:center}.manualCard summary small{color:var(--muted)}.manualCard summary strong{font-size:14px}.manualCardBody{display:grid;gap:18px;border-top:1px solid var(--line);padding:22px}.manualGrid2,.manualGrid3,.manualGrid5{display:grid;gap:14px}.manualGrid2{grid-template-columns:1fr 2fr}.manualGrid3{grid-template-columns:repeat(3,1fr)}.manualGrid5{grid-template-columns:repeat(5,1fr)}.checkField{display:flex;align-items:center;gap:8px;font-weight:700;padding-top:26px}.removeButton{justify-self:start;border:0;background:none;color:#a33;text-decoration:underline;cursor:pointer}.manualSubmit{position:sticky;bottom:16px;z-index:5;display:flex;justify-content:flex-end;align-items:center;gap:18px;padding:14px 16px;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:13px;box-shadow:0 8px 28px rgba(0,0,0,.1)}.manualSubmit span{color:var(--muted)}@media(max-width:900px){.manualBatchFields,.manualGrid2,.manualGrid3,.manualGrid5{grid-template-columns:1fr 1fr}.manualCard summary{grid-template-columns:1fr}.manualCard summary strong{display:none}}@media(max-width:560px){.manualBatchFields,.manualGrid2,.manualGrid3,.manualGrid5{grid-template-columns:1fr}}
+.manualForm {
+  display: grid;
+  gap: 24px;
+}
+.manualBatchFields {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 16px;
+  padding: 22px;
+}
+.field select {
+  border: 1px solid #cfd8d4;
+  border-radius: 9px;
+  padding: 11px 12px;
+  font: inherit;
+  background: white;
+}
+.manualListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.manualListHeader h2 {
+  margin: 0 0 4px;
+}
+.manualCards {
+  display: grid;
+  gap: 14px;
+}
+.manualCard {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.manualCard summary {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) 1.3fr;
+  gap: 24px;
+  align-items: center;
+  padding: 18px 22px;
+  cursor: pointer;
+  list-style: none;
+}
+.manualCard summary::-webkit-details-marker {
+  display: none;
+}
+.manualCard summary > span {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.manualCard summary small {
+  color: var(--muted);
+}
+.manualCard summary strong {
+  font-size: 14px;
+}
+.manualCardBody {
+  display: grid;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+  padding: 22px;
+}
+.manualGrid2,
+.manualGrid3,
+.manualGrid4 {
+  display: grid;
+  gap: 14px;
+}
+.manualGrid2 {
+  grid-template-columns: 1fr 2fr;
+}
+.manualGrid3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.manualGrid4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.checkField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  padding-top: 26px;
+}
+.removeButton {
+  justify-self: start;
+  border: 0;
+  background: none;
+  color: #a33;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.manualSubmit {
+  position: sticky;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+}
+.manualSubmit span {
+  color: var(--muted);
+}
+@media (max-width: 900px) {
+  .manualBatchFields,
+  .manualGrid2,
+  .manualGrid3,
+  .manualGrid4 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .manualCard summary {
+    grid-template-columns: 1fr;
+  }
+  .manualCard summary strong {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .manualBatchFields,
+  .manualGrid2,
+  .manualGrid3,
+  .manualGrid4 {
+    grid-template-columns: 1fr;
+  }
+}

@@ -100,8 +100,7 @@ export function ProductEditor({
   }
 
   function bulk(
-    field:
-      "salePrice" | "costPrice" | "initialStock" | "departmentId" | "category",
+    field: "salePrice" | "initialStock" | "departmentId" | "category",
     value: string,
   ) {
     setProducts((current) =>
@@ -200,14 +199,6 @@ export function ProductEditor({
             />
           </label>
           <label>
-            原価
-            <input
-              type="number"
-              min="0"
-              onChange={(event) => bulk("costPrice", event.target.value)}
-            />
-          </label>
-          <label>
             在庫
             <input
               type="number"
@@ -292,23 +283,6 @@ export function ProductEditor({
                       update(
                         product.sourceKey,
                         "salePrice",
-                        event.target.value === ""
-                          ? null
-                          : Number(event.target.value),
-                      )
-                    }
-                  />
-                </div>
-                <div className="field">
-                  <label>原価</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={product.costPrice ?? ""}
-                    onChange={(event) =>
-                      update(
-                        product.sourceKey,
-                        "costPrice",
                         event.target.value === ""
                           ? null
                           : Number(event.target.value),
