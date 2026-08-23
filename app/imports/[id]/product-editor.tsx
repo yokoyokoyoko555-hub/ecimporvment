@@ -32,6 +32,7 @@ export function ProductEditor({
 }) {
   const [products, setProducts] = useState(initialProducts);
   const [filter, setFilter] = useState("");
+  const [rarityFilter, setRarityFilter] = useState("all");
   const [sort, setSort] = useState<"card" | "rarity-desc" | "rarity-asc">(
     "card",
   );
@@ -55,11 +56,20 @@ export function ProductEditor({
     const rank = rarityOrder.indexOf(rarity || "");
     return rank === -1 ? rarityOrder.length : rank;
   };
+  const availableRarities = Array.from(
+    new Set(products.map((product) => product.rarity || "")),
+  ).sort(
+    (a, b) =>
+      rarityRank(a) - rarityRank(b) ||
+      a.localeCompare(b, "ja", { numeric: true }),
+  );
   const shown = products
-    .filter((product) =>
-      `${product.cardNumber} ${product.cardName} ${product.productName}`
-        .toLowerCase()
-        .includes(filter.toLowerCase()),
+    .filter(
+      (product) =>
+        (rarityFilter === "all" || (product.rarity || "") === rarityFilter) &&
+        `${product.cardNumber} ${product.cardName} ${product.productName}`
+          .toLowerCase()
+          .includes(filter.toLowerCase()),
     )
     .sort((a, b) => {
       const cardOrder = a.cardNumber.localeCompare(b.cardNumber, "ja", {
@@ -175,6 +185,19 @@ export function ProductEditor({
           <option value="card">型番順</option>
           <option value="rarity-desc">レアリティ順（高い順）</option>
           <option value="rarity-asc">レアリティ順（低い順）</option>
+        </select>
+        <select
+          className="rarityFilterSelect"
+          aria-label="表示するレアリティ"
+          value={rarityFilter}
+          onChange={(event) => setRarityFilter(event.target.value)}
+        >
+          <option value="all">すべてのレアリティ</option>
+          {availableRarities.map((rarity) => (
+            <option value={rarity} key={rarity || "no-rarity"}>
+              {rarity || "レアリティなし"}だけ表示
+            </option>
+          ))}
         </select>
         <span className={invalid ? "validationBad" : "validationGood"}>
           {invalid

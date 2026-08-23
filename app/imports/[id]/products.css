@@ -29,7 +29,8 @@
   border-radius: 10px;
   padding: 12px;
 }
-.sortSelect {
+.sortSelect,
+.rarityFilterSelect {
   min-width: 210px;
   border: 1px solid var(--line);
   border-radius: 10px;
