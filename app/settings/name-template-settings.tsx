@@ -67,6 +67,35 @@ export function NameTemplateSettings({
     if (response.ok) router.refresh();
   }
 
+  async function remove(item: TemplateItem, index: number) {
+    const saved = initialItems.some(
+      (initial) => initial.titleKey === item.titleKey,
+    );
+    if (!saved) {
+      setItems((current) =>
+        current.filter((_, itemIndex) => itemIndex !== index),
+      );
+      return;
+    }
+    if (!window.confirm(`「${item.displayName}」を削除しますか？`)) return;
+    setMessage("削除しています…");
+    const response = await fetch("/api/settings/name-templates", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ titleKey: item.titleKey }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      setMessage(result.error || "削除に失敗しました");
+      return;
+    }
+    setItems((current) =>
+      current.filter((_, itemIndex) => itemIndex !== index),
+    );
+    setMessage(`${item.displayName}を削除しました。`);
+    router.refresh();
+  }
+
   return (
     <section className="panel">
       <div className="panelHeader">
@@ -147,13 +176,24 @@ export function NameTemplateSettings({
                 <span>プレビュー</span>
                 <strong>{previews[index]}</strong>
               </div>
-              <button
-                className="button secondary"
-                type="button"
-                onClick={() => save(item)}
-              >
-                保存
-              </button>
+              <div className="templateActions">
+                <button
+                  className="button secondary"
+                  type="button"
+                  onClick={() => save(item)}
+                >
+                  保存
+                </button>
+                {!["onepiece", "digimon"].includes(item.titleKey) && (
+                  <button
+                    className="button dangerButton"
+                    type="button"
+                    onClick={() => remove(item, index)}
+                  >
+                    削除
+                  </button>
+                )}
+              </div>
             </div>
           </details>
         ))}
