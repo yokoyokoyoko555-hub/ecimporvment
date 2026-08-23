@@ -1,1 +1,2 @@
 .inlineCheck{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;font-weight:500}
+.manualChecks{display:flex;align-items:center;gap:18px}.manualChecks .checkField{padding-top:26px}.damagedCheck{color:#9a4f13}
