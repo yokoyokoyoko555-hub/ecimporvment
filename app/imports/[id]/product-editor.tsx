@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { needsDigimonSpReview } from "@/lib/product-review";
 
 export interface EditableProduct {
   id: string | null;
   sourceKey: string;
+  variationCode: string;
   cardNumber: string;
   cardName: string;
   rarity: string | null;
@@ -26,9 +28,11 @@ export interface EditableProduct {
 export function ProductEditor({
   initialProducts,
   batchId,
+  sourceType,
 }: {
   initialProducts: EditableProduct[];
   batchId: string;
+  sourceType: string;
 }) {
   const [products, setProducts] = useState(initialProducts);
   const [filter, setFilter] = useState("");
@@ -99,6 +103,13 @@ export function ProductEditor({
   const invalid = products.filter(
     (product) =>
       product.exportEnabled && (!product.category || !product.productCode),
+  ).length;
+  const spReviewCount = products.filter((product) =>
+    needsDigimonSpReview(
+      sourceType,
+      product.variationCode,
+      product.productName,
+    ),
   ).length;
 
   function update(
@@ -212,6 +223,9 @@ export function ProductEditor({
             ? `おちゃのこ必須項目 未入力 ${invalid}件`
             : "おちゃのこCSV出力 OK"}
         </span>
+        {spReviewCount > 0 && (
+          <span className="spReviewCount">SP表記 要確認 {spReviewCount}件</span>
+        )}
         <button className="button" disabled={saving} onClick={saveAll}>
           {saving ? "保存中…" : "すべて保存"}
         </button>
@@ -261,9 +275,15 @@ export function ProductEditor({
       </details>
       {message && <div className="notice editorMessage">{message}</div>}
       <div className="productCards">
-        {shown.map((product) => (
+        {shown.map((product) => {
+          const needsSpReview = needsDigimonSpReview(
+            sourceType,
+            product.variationCode,
+            product.productName,
+          );
+          return (
           <article
-            className={`productCard${product.isDamaged ? " damagedProduct" : ""}`}
+            className={`productCard${product.isDamaged ? " damagedProduct" : ""}${needsSpReview ? " spReviewProduct" : ""}`}
             key={product.sourceKey}
           >
             <div className="productImage">
@@ -281,8 +301,16 @@ export function ProductEditor({
                 {product.isDamaged && (
                   <span className="damagedBadge">状態A-</span>
                 )}
+                {needsSpReview && (
+                  <span className="spReviewBadge">SP候補・要対応</span>
+                )}
                 <span>{product.colors.join("・")}</span>
               </div>
+              {needsSpReview && (
+                <div className="spReviewNotice">
+                  このP2画像はSPの可能性があります。画像を確認し、商品名のレアリティを【SP】に修正してください。
+                </div>
+              )}
               <div className="field">
                 <label>商品名</label>
                 <input
@@ -393,7 +421,8 @@ export function ProductEditor({
               </div>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
     </>
   );

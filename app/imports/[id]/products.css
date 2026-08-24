@@ -44,6 +44,15 @@
   font-weight: 700;
   font-size: 13px;
 }
+.spReviewCount,
+.spReviewBadge {
+  background: #ffe1dc;
+  color: #a22c22;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 800;
+}
 .validationBad {
   background: #ffead1;
   color: #8b5013;
@@ -114,6 +123,25 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 16px;
+}
+.productCard.spReviewProduct {
+  border: 2px solid #df5b4f;
+  background: #fff9f7;
+}
+.cardMeta .spReviewBadge {
+  background: #d94337;
+  color: white;
+  border-radius: 20px;
+  padding: 4px 9px;
+}
+.spReviewNotice {
+  margin-bottom: 10px;
+  border-left: 4px solid #d94337;
+  background: #ffe8e3;
+  color: #8d261e;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 700;
 }
 .productImage {
   display: grid;

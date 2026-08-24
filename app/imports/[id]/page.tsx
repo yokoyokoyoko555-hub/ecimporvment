@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 type ProductRow = {
   id: string | null;
   source_key: string;
+  variation_code: string;
   card_number: string;
   card_name: string;
   rarity: string | null;
@@ -38,13 +39,14 @@ export default async function Page({
     set_code: string | null;
     card_count: number;
     status: string;
+    source_type: string;
   }>(
-    "SELECT set_name,set_code,card_count,status FROM import_batches WHERE id=$1",
+    "SELECT set_name,set_code,card_count,status,source_type FROM import_batches WHERE id=$1",
     [id],
   );
   if (!batchResult.rows[0]) notFound();
   const result = await pool.query<ProductRow>(
-    `SELECT p.id,c.source_key,c.card_number,c.card_name,c.rarity,c.colors,c.is_parallel,c.source_image_url,p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.export_enabled
+    `SELECT p.id,c.source_key,c.variation_code,c.card_number,c.card_name,c.rarity,c.colors,c.is_parallel,c.source_image_url,p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.export_enabled
     FROM cards c LEFT JOIN LATERAL(SELECT px.* FROM products px JOIN cards pc ON pc.id=px.card_id WHERE pc.card_number=c.card_number AND pc.variation_code=c.variation_code LIMIT 1)p ON true
     WHERE c.import_batch_id=$1 ORDER BY c.card_number,c.variation_code`,
     [id],
@@ -54,6 +56,7 @@ export default async function Page({
   const products: EditableProduct[] = result.rows.map((row) => ({
     id: row.id,
     sourceKey: row.source_key,
+    variationCode: row.variation_code,
     cardNumber: row.card_number,
     cardName: row.card_name,
     rarity: row.rarity,
@@ -90,7 +93,11 @@ export default async function Page({
           </Link>
         </div>
       </header>
-      <ProductEditor initialProducts={products} batchId={id} />
+      <ProductEditor
+        initialProducts={products}
+        batchId={id}
+        sourceType={batch.source_type}
+      />
     </>
   );
 }
