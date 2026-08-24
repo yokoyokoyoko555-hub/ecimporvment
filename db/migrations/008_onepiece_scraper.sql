@@ -2,7 +2,7 @@ ALTER TABLE catalog_sources DROP CONSTRAINT IF EXISTS catalog_sources_scraper_ke
 -- This migration can run once on databases that already contain newer scraper
 -- rows while the migration ledger is being introduced. Keep the constraint
 -- compatible with every scraper known by this release.
-ALTER TABLE catalog_sources ADD CONSTRAINT catalog_sources_scraper_key_check CHECK(scraper_key IN ('digimon','onepiece','lorcana'));
+ALTER TABLE catalog_sources ADD CONSTRAINT catalog_sources_scraper_key_check CHECK(scraper_key IN ('digimon','onepiece','lorcana','xross-stars'));
 
 DROP INDEX IF EXISTS import_batches_unique_active_set;
 CREATE UNIQUE INDEX import_batches_unique_active_set

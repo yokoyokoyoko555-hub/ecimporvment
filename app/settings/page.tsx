@@ -69,7 +69,12 @@ export default async function SettingsPage() {
       display_name: string;
       source_name: string | null;
       acquisition_method: "manual" | "scraping" | null;
-      scraper_key: "digimon" | "onepiece" | "lorcana" | null;
+      scraper_key:
+        | "digimon"
+        | "onepiece"
+        | "lorcana"
+        | "xross-stars"
+        | null;
       default_url: string | null;
       active: boolean | null;
     }>(`SELECT t.title_key,t.display_name,s.source_name,s.acquisition_method,s.scraper_key,s.default_url,s.active

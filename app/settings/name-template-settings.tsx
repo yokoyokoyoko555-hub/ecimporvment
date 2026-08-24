@@ -184,7 +184,13 @@ export function NameTemplateSettings({
                 >
                   保存
                 </button>
-                {!["onepiece", "digimon", "lorcana"].includes(
+                {![
+                  "onepiece",
+                  "digimon",
+                  "lorcana",
+                  "xross-stars",
+                  "harrypotter",
+                ].includes(
                   item.titleKey,
                 ) && (
                   <button

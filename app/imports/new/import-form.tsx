@@ -8,7 +8,7 @@ export type ImportSource = {
   titleKey: string;
   displayName: string;
   sourceName: string;
-  scraperKey: "digimon" | "onepiece" | "lorcana";
+  scraperKey: "digimon" | "onepiece" | "lorcana" | "xross-stars";
   defaultUrl: string;
 };
 
@@ -22,6 +22,11 @@ function defaultSet(source: ImportSource | undefined) {
     return {
       name: "エクストラブースター DIGITAL WORLD SHAMBALA【EX-12】",
       code: "EX-12",
+    };
+  if (source?.scraperKey === "xross-stars")
+    return {
+      name: "ブースターパック第4弾『Grand Resonance』【BP04】",
+      code: "BP04",
     };
   return { name: "", code: "" };
 }
@@ -52,6 +57,8 @@ export function ImportForm({ sources }: { sources: ImportSource[] }) {
             ? "/api/imports/onepiece"
             : selected?.scraperKey === "lorcana"
               ? "/api/imports/lorcana"
+              : selected?.scraperKey === "xross-stars"
+                ? "/api/imports/xross-stars"
               : null;
       if (!endpoint) throw new Error("この取得元のスクレイパーは未対応です");
       const response = await fetch(endpoint, {

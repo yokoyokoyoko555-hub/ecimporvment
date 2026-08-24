@@ -7,7 +7,9 @@ const schema = z
     titleKey: z.string().trim().min(2).max(40),
     sourceName: z.string().trim().min(1).max(100),
     acquisitionMethod: z.enum(["manual", "scraping"]),
-    scraperKey: z.enum(["digimon", "onepiece", "lorcana"]).nullable(),
+    scraperKey: z
+      .enum(["digimon", "onepiece", "lorcana", "xross-stars"])
+      .nullable(),
     defaultUrl: z.union([z.string().url(), z.literal("")]).nullable(),
     active: z.boolean(),
   })
