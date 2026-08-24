@@ -53,6 +53,16 @@
   font-size: 13px;
   font-weight: 800;
 }
+.spReviewCount {
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.spReviewCount:hover,
+.spReviewCount.active {
+  border-color: #a22c22;
+  background: #ffd1ca;
+}
 .validationBad {
   background: #ffead1;
   color: #8b5013;

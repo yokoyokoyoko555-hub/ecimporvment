@@ -37,6 +37,7 @@ export function ProductEditor({
   const [products, setProducts] = useState(initialProducts);
   const [filter, setFilter] = useState("");
   const [rarityFilter, setRarityFilter] = useState("all");
+  const [spReviewOnly, setSpReviewOnly] = useState(false);
   const [sort, setSort] = useState<"card" | "rarity-desc" | "rarity-asc">(
     "card",
   );
@@ -79,6 +80,12 @@ export function ProductEditor({
     .filter(
       (product) =>
         (rarityFilter === "all" || (product.rarity || "") === rarityFilter) &&
+        (!spReviewOnly ||
+          needsDigimonSpReview(
+            sourceType,
+            product.variationCode,
+            product.productName,
+          )) &&
         `${product.cardNumber} ${product.cardName} ${product.productName}`
           .toLowerCase()
           .includes(filter.toLowerCase()),
@@ -223,8 +230,16 @@ export function ProductEditor({
             ? `おちゃのこ必須項目 未入力 ${invalid}件`
             : "おちゃのこCSV出力 OK"}
         </span>
-        {spReviewCount > 0 && (
-          <span className="spReviewCount">SP表記 要確認 {spReviewCount}件</span>
+        {(spReviewCount > 0 || spReviewOnly) && (
+          <button
+            type="button"
+            className={`spReviewCount${spReviewOnly ? " active" : ""}`}
+            aria-pressed={spReviewOnly}
+            onClick={() => setSpReviewOnly((current) => !current)}
+            title="クリックしてSP要確認カードだけを表示"
+          >
+            {spReviewOnly ? "全件表示へ戻る" : `SP表記 要確認 ${spReviewCount}件`}
+          </button>
         )}
         <button className="button" disabled={saving} onClick={saveAll}>
           {saving ? "保存中…" : "すべて保存"}
