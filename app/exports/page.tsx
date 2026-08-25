@@ -11,6 +11,7 @@ type Status = {
   missing_price: string;
   missing_department: string;
   missing_category: string;
+  missing_subcategory: string;
   missing_code: string;
   missing_image: string;
 };
@@ -28,6 +29,7 @@ export default async function Page({
     missing_price: "0",
     missing_department: "0",
     missing_category: "0",
+    missing_subcategory: "0",
     missing_code: "0",
     missing_image: "0",
   };
@@ -37,6 +39,7 @@ export default async function Page({
       count(*) FILTER(WHERE p.sale_price IS NULL)::text missing_price,
       count(*) FILTER(WHERE p.department_id IS NULL OR trim(p.department_id)='')::text missing_department,
       count(*) FILTER(WHERE p.category IS NULL OR trim(p.category)='')::text missing_category,
+      count(*) FILTER(WHERE p.subcategory IS NULL OR trim(p.subcategory)='')::text missing_subcategory,
       count(*) FILTER(WHERE p.product_code IS NULL OR trim(p.product_code)='')::text missing_code,
       count(*) FILTER(WHERE c.source_image_url IS NULL OR trim(c.source_image_url)='')::text missing_image
       FROM cards c JOIN products p ON p.card_id=c.id WHERE c.import_batch_id=$1 AND p.export_enabled=true`,
@@ -46,11 +49,12 @@ export default async function Page({
   }
   const department = Number(status.missing_department),
     category = Number(status.missing_category),
+    subcategory = Number(status.missing_subcategory),
     code = Number(status.missing_code),
     missingImage = Number(status.missing_image);
   const ochanokoReason =
-    code || category
-      ? `未入力があります：商品コード ${code}件・カテゴリ ${category}件`
+    code || category || subcategory
+      ? `未入力があります：商品コード ${code}件・カテゴリ ${category}件・サブカテゴリ ${subcategory}件`
       : null;
   const smaregiReason =
     code || department

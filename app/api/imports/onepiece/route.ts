@@ -7,6 +7,7 @@ import {
   renderProductName,
 } from "@/lib/product-name";
 import { resolveProductCode } from "@/lib/product-code";
+import { ochanokoCategoryName, ochanokoSubcategoryName } from "@/lib/catalog-category";
 
 const schema = z
   .object({
@@ -39,7 +40,8 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   const { sourceUrl, setName, setCode } = parsed.data;
-  const category = setName.replace(/\s+【/g, "【").trim();
+  const category = ochanokoCategoryName("onepiece", "ワンピースカード");
+  const subcategory = ochanokoSubcategoryName(setName);
   const existing = await pool.query<{ id: string }>(
     "SELECT id FROM import_batches WHERE source_type='onepiece' AND lower(trim(set_code))=lower(trim($1)) AND status<>'failed' ORDER BY created_at LIMIT 1",
     [setCode],
@@ -118,13 +120,14 @@ export async function POST(request: Request) {
           isParallel: card.isParallel,
         });
         await client.query(
-          `INSERT INTO products(card_id,product_code,product_name,image_file_name,category) VALUES($1,$2,$3,$4,$5)`,
+          `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory) VALUES($1,$2,$3,$4,$5,$6)`,
           [
             inserted.rows[0].id,
             productCode,
             productName,
             card.imageUrl ? `${productCode}.png` : null,
             category,
+            subcategory,
           ],
         );
       }

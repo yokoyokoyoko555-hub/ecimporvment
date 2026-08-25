@@ -14,6 +14,7 @@ const item = z.object({
   initialStock: z.number().int().min(0).nullable(),
   departmentId: z.string(),
   category: z.string(),
+  subcategory: z.string(),
   exportEnabled: z.boolean(),
   createDamaged: z.boolean().default(false),
 });
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
     let createdDamaged = 0;
     for (const product of parsed.data.products) {
       await client.query(
-        `UPDATE products SET product_name=$1,product_code=$2,sale_price=$3,cost_price=$4,initial_stock=$5,department_id=$6,category=$7,export_enabled=$8,updated_at=now() WHERE id=$9`,
+        `UPDATE products SET product_name=$1,product_code=$2,sale_price=$3,cost_price=$4,initial_stock=$5,department_id=$6,category=$7,subcategory=$8,export_enabled=$9,updated_at=now() WHERE id=$10`,
         [
           product.productName,
           product.productCode,
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
           product.initialStock,
           product.departmentId || null,
           product.category || null,
+          product.subcategory || null,
           product.exportEnabled,
           product.id,
         ],
@@ -143,14 +145,15 @@ export async function POST(request: Request) {
           ? product.productName
           : `【傷あり特価】[状態A-] ${product.productName}`;
         await client.query(
-          `INSERT INTO products(card_id,product_code,product_name,sale_price,cost_price,initial_stock,department_id,category,image_file_name,export_enabled)
-          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6,true)`,
+          `INSERT INTO products(card_id,product_code,product_name,sale_price,cost_price,initial_stock,department_id,category,subcategory,image_file_name,export_enabled)
+          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6,$7,true)`,
           [
             damagedCard.rows[0].id,
             damagedCode,
             damagedName,
             product.departmentId || null,
             product.category || null,
+            product.subcategory || null,
             extension ? `${damagedCode}${extension}` : null,
           ],
         );
@@ -162,7 +165,7 @@ export async function POST(request: Request) {
       [parsed.data.batchId],
     );
     const result = await client.query<{ count: string }>(
-      `SELECT count(*) FROM cards ca JOIN LATERAL(SELECT px.* FROM products px JOIN cards pc ON pc.id=px.card_id WHERE pc.card_number=ca.card_number AND pc.variation_code=ca.variation_code AND px.export_enabled=true LIMIT 1)p ON true WHERE ca.import_batch_id=$1 AND(p.category IS NULL OR trim(p.category)='' OR p.product_code='')`,
+      `SELECT count(*) FROM cards ca JOIN LATERAL(SELECT px.* FROM products px JOIN cards pc ON pc.id=px.card_id WHERE pc.card_number=ca.card_number AND pc.variation_code=ca.variation_code AND px.export_enabled=true LIMIT 1)p ON true WHERE ca.import_batch_id=$1 AND(p.category IS NULL OR trim(p.category)='' OR p.subcategory IS NULL OR trim(p.subcategory)='' OR p.product_code='')`,
       [parsed.data.batchId],
     );
     const missing = Number(result.rows[0].count);

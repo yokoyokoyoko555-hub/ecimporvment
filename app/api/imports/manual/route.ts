@@ -30,6 +30,7 @@ const cardSchema = z.object({
   initialStock: z.number().int().min(0).nullable().default(null),
   departmentId: z.string().trim().max(50).nullable().optional(),
   category: z.string().trim().max(200).nullable().optional(),
+  subcategory: z.string().trim().max(200).nullable().optional(),
 });
 
 const schema = z.object({
@@ -60,8 +61,9 @@ export async function POST(request: Request) {
     const templateResult = await client.query<{
       template_text: string;
       multiple_colors_label: string | null;
+      display_name: string;
     }>(
-      "SELECT template_text, multiple_colors_label FROM product_name_templates WHERE title_key=$1",
+      "SELECT template_text, multiple_colors_label, display_name FROM product_name_templates WHERE title_key=$1",
       [parsed.data.titleKey],
     );
     const template = templateResult.rows[0];
@@ -74,15 +76,17 @@ export async function POST(request: Request) {
     );
     const batchResult = await client.query<{ id: string }>(
       `INSERT INTO import_batches(source_type, source_url, set_name, set_code, status, card_count, fetched_at)
-      VALUES('manual', 'manual://entry', $1, $2, 'needs_review', $3, now()) RETURNING id`,
-      [parsed.data.setName, parsed.data.setCode, totalProducts],
+      VALUES($1, 'manual://entry', $2, $3, 'needs_review', $4, now()) RETURNING id`,
+      [`manual:${parsed.data.titleKey}`, parsed.data.setName, parsed.data.setCode, totalProducts],
     );
     const batchId = batchResult.rows[0].id;
-    const defaultCategory = parsed.data.setName.replace(/\s+【/g, "【").trim();
+    const defaultCategory = template.display_name;
+    const defaultSubcategory = parsed.data.setName.replace(/\s+【/g, "【").trim();
 
     for (let index = 0; index < parsed.data.cards.length; index += 1) {
       const card = parsed.data.cards[index];
       const category = card.category || defaultCategory;
+      const subcategory = card.subcategory || defaultSubcategory;
       const productCode = await resolveProductCode(
         client,
         parsed.data.titleKey,
@@ -124,8 +128,8 @@ export async function POST(request: Request) {
       );
       await client.query(
         `INSERT INTO products(
-        card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, image_file_name)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, subcategory, image_file_name)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
         [
           cardResult.rows[0].id,
           productCode,
@@ -135,6 +139,7 @@ export async function POST(request: Request) {
           card.initialStock,
           card.departmentId || null,
           category,
+          subcategory,
           card.imageUrl ? `${productCode}.jpg` : null,
         ],
       );
@@ -171,14 +176,15 @@ export async function POST(request: Request) {
         );
         await client.query(
           `INSERT INTO products(
-          card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, image_file_name)
-          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6)`,
+          card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, subcategory, image_file_name)
+          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6,$7)`,
           [
             damagedCard.rows[0].id,
             damagedCode,
             `【傷あり特価】[状態A-] ${card.productName || generatedName}`,
             card.departmentId || null,
             category,
+            subcategory,
             card.imageUrl ? `${damagedCode}.jpg` : null,
           ],
         );

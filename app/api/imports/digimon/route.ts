@@ -6,6 +6,7 @@ import {
   DEFAULT_PRODUCT_NAME_TEMPLATES,
   renderProductName,
 } from "@/lib/product-name";
+import { ochanokoCategoryName, ochanokoSubcategoryName } from "@/lib/catalog-category";
 
 const inputSchema = z
   .object({
@@ -38,7 +39,8 @@ export async function POST(request: Request) {
     );
 
   const { sourceUrl, setName, setCode } = parsed.data;
-  const category = setName.replace(/\s+【/g, "【").trim();
+  const category = ochanokoCategoryName("digimon", "デジモンカード");
+  const subcategory = ochanokoSubcategoryName(setName);
   const client = await pool.connect();
   let batchId: string | undefined;
   try {
@@ -116,14 +118,15 @@ export async function POST(request: Request) {
         isParallel: card.isParallel,
       });
       await client.query(
-        `INSERT INTO products(card_id,product_code,product_name,image_file_name,category)
-        VALUES($1,$2,$3,$4,$5) ON CONFLICT(product_code) DO NOTHING`,
+        `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory)
+        VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(product_code) DO NOTHING`,
         [
           inserted.rows[0].id,
           productCode,
           productName,
           card.imageUrl ? `${card.sourceKey}.png` : null,
           category,
+          subcategory,
         ],
       );
     }

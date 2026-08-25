@@ -26,6 +26,7 @@ type CardInput = {
   initialStock: string;
   departmentId: string;
   category: string;
+  subcategory: string;
 };
 
 const emptyCard = (): CardInput => ({
@@ -44,6 +45,7 @@ const emptyCard = (): CardInput => ({
   initialStock: "",
   departmentId: "",
   category: "",
+  subcategory: "",
 });
 const colorsOf = (text: string) =>
   text
@@ -146,7 +148,8 @@ export function ManualImportForm({
         initialStock:
           card.initialStock === "" ? null : Number(card.initialStock),
         departmentId: card.departmentId || null,
-        category: card.category || setName.replace(/\s+【/g, "【").trim(),
+        category: card.category || template?.displayName || "",
+        subcategory: card.subcategory || setName.replace(/\s+【/g, "【").trim(),
       })),
     };
     try {
@@ -394,12 +397,22 @@ export function ManualImportForm({
                   />
                 </div>
                 <div className="field">
-                  <label>おちゃのこカテゴリ</label>
+                  <label>おちゃのこカテゴリ（タイトル）</label>
                   <input
                     value={card.category}
                     onChange={(e) =>
                       update(card.key, "category", e.target.value)
                     }
+                  />
+                </div>
+                <div className="field">
+                  <label>おちゃのこサブカテゴリ（収録名）</label>
+                  <input
+                    value={card.subcategory}
+                    onChange={(e) =>
+                      update(card.key, "subcategory", e.target.value)
+                    }
+                    placeholder={setName}
                   />
                 </div>
               </div>

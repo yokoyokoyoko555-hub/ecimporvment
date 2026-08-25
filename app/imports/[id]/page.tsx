@@ -4,6 +4,7 @@ import { pool } from "@/lib/db";
 import { ProductEditor, type EditableProduct } from "./product-editor";
 import "./products.css";
 import "./damage.css";
+import { ochanokoCategoryName, ochanokoSubcategoryName } from "@/lib/catalog-category";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,7 @@ type ProductRow = {
   initial_stock: number | null;
   department_id: string | null;
   category: string | null;
+  subcategory: string | null;
   export_enabled: boolean | null;
 };
 
@@ -46,13 +48,14 @@ export default async function Page({
   );
   if (!batchResult.rows[0]) notFound();
   const result = await pool.query<ProductRow>(
-    `SELECT p.id,c.source_key,c.variation_code,c.card_number,c.card_name,c.rarity,c.colors,c.is_parallel,c.source_image_url,p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.export_enabled
+    `SELECT p.id,c.source_key,c.variation_code,c.card_number,c.card_name,c.rarity,c.colors,c.is_parallel,c.source_image_url,p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.export_enabled
     FROM cards c LEFT JOIN LATERAL(SELECT px.* FROM products px JOIN cards pc ON pc.id=px.card_id WHERE pc.card_number=c.card_number AND pc.variation_code=c.variation_code LIMIT 1)p ON true
     WHERE c.import_batch_id=$1 ORDER BY c.card_number,c.variation_code`,
     [id],
   );
   const batch = batchResult.rows[0];
-  const defaultCategory = batch.set_name.replace(/\s+【/g, "【").trim();
+  const defaultCategory = ochanokoCategoryName(batch.source_type, batch.source_type);
+  const defaultSubcategory = ochanokoSubcategoryName(batch.set_name);
   const products: EditableProduct[] = result.rows.map((row) => ({
     id: row.id,
     sourceKey: row.source_key,
@@ -70,6 +73,7 @@ export default async function Page({
     initialStock: row.initial_stock,
     departmentId: row.department_id || "",
     category: row.category || defaultCategory,
+    subcategory: row.subcategory || defaultSubcategory,
     exportEnabled: row.export_enabled ?? true,
     isDamaged: row.product_code?.endsWith("dmg") ?? false,
     createDamaged: false,

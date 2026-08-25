@@ -20,6 +20,7 @@ export interface EditableProduct {
   initialStock: number | null;
   departmentId: string;
   category: string;
+  subcategory: string;
   exportEnabled: boolean;
   isDamaged: boolean;
   createDamaged: boolean;
@@ -109,7 +110,8 @@ export function ProductEditor({
     damagedTargets.every((product) => product.createDamaged);
   const invalid = products.filter(
     (product) =>
-      product.exportEnabled && (!product.category || !product.productCode),
+      product.exportEnabled &&
+      (!product.category || !product.subcategory || !product.productCode),
   ).length;
   const spReviewCount = products.filter((product) =>
     needsDigimonSpReview(
@@ -132,14 +134,14 @@ export function ProductEditor({
   }
 
   function bulk(
-    field: "salePrice" | "initialStock" | "departmentId" | "category",
+    field: "salePrice" | "initialStock" | "departmentId" | "category" | "subcategory",
     value: string,
   ) {
     setProducts((current) =>
       current.map((product) => ({
         ...product,
         [field]:
-          field === "departmentId" || field === "category"
+          field === "departmentId" || field === "category" || field === "subcategory"
             ? value
             : value === ""
               ? null
@@ -271,8 +273,12 @@ export function ProductEditor({
             />
           </label>
           <label>
-            カテゴリ
+            カテゴリ（タイトル）
             <input onChange={(event) => bulk("category", event.target.value)} />
+          </label>
+          <label>
+            サブカテゴリ（収録名）
+            <input onChange={(event) => bulk("subcategory", event.target.value)} />
           </label>
         </div>
         <label className="bulkDamaged">
@@ -394,11 +400,20 @@ export function ProductEditor({
                 </div>
               </div>
               <div className="field">
-                <label>おちゃのこカテゴリ</label>
+                <label>おちゃのこカテゴリ（タイトル）</label>
                 <input
                   value={product.category}
                   onChange={(event) =>
                     update(product.sourceKey, "category", event.target.value)
+                  }
+                />
+              </div>
+              <div className="field">
+                <label>おちゃのこサブカテゴリ（収録名）</label>
+                <input
+                  value={product.subcategory}
+                  onChange={(event) =>
+                    update(product.sourceKey, "subcategory", event.target.value)
                   }
                 />
               </div>

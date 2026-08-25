@@ -3,6 +3,7 @@ import { z } from "zod";
 import { pool } from "@/lib/db";
 import { renderProductName } from "@/lib/product-name";
 import { fetchXrossStarsCards } from "@/lib/xross-stars";
+import { ochanokoCategoryName, ochanokoSubcategoryName } from "@/lib/catalog-category";
 
 const schema = z
   .object({
@@ -64,7 +65,8 @@ export async function POST(request: Request) {
         templateText: templateResult.rows[0].template_text,
         multipleColorsLabel: templateResult.rows[0].multiple_colors_label,
       };
-      const category = setName.replace(/\s+【/g, "【").trim();
+      const category = ochanokoCategoryName("xross-stars", "Xross Stars");
+      const subcategory = ochanokoSubcategoryName(setName);
       for (const card of cards) {
         const inserted = await client.query<{ id: string }>(
           `INSERT INTO cards(import_batch_id,source_key,card_number,variation_code,rarity,card_type,level,is_parallel,card_name,colors,play_cost,dp,form,attribute,traits,upper_text,lower_text,source_image_url,raw_data)
@@ -81,9 +83,9 @@ export async function POST(request: Request) {
           isParallel: card.isParallel,
         });
         await client.query(
-          `INSERT INTO products(card_id,product_code,product_name,image_file_name,category)
-           VALUES($1,$2,$3,$4,$5)`,
-          [inserted.rows[0].id, productCode, productName, `${productCode}.png`, category],
+          `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory)
+           VALUES($1,$2,$3,$4,$5,$6)`,
+          [inserted.rows[0].id, productCode, productName, `${productCode}.png`, category, subcategory],
         );
       }
       await client.query(
