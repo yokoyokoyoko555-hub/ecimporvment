@@ -4,6 +4,7 @@ import iconv from "iconv-lite";
 import { z } from "zod";
 import { pool } from "@/lib/db";
 import { csvLine, ochanokoHeaders } from "@/lib/csv";
+import { ochanokoImagePath } from "@/lib/catalog-category";
 
 interface ProductRow {
   product_code: string;
@@ -22,6 +23,7 @@ interface ProductRow {
   card_name: string;
   rarity: string | null;
   colors: string[];
+  source_type: string;
 }
 const querySchema = z.object({
   batch: z.string().uuid(),
@@ -32,8 +34,8 @@ async function load(batchId: string) {
   if (!pool) throw new Error("データベースが接続されていません");
   return (
     await pool.query<ProductRow>(
-      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.card_name,c.rarity,c.colors
-    FROM cards c JOIN products p ON p.card_id=c.id
+      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.card_name,c.rarity,c.colors,b.source_type
+    FROM cards c JOIN products p ON p.card_id=c.id JOIN import_batches b ON b.id=c.import_batch_id
     WHERE c.import_batch_id=$1 AND p.export_enabled=true ORDER BY c.card_number,c.variation_code,p.created_at`,
       [batchId],
     )
@@ -130,7 +132,10 @@ export async function GET(request: Request) {
         set("グループ", product.group_name);
         set("販売価格", product.sale_price);
         set("在庫数", product.initial_stock);
-        set("メイン写真1", product.image_file_name);
+        set(
+          "メイン写真1",
+          ochanokoImagePath(product.source_type, product.image_file_name),
+        );
         set(
           "説明",
           product.description_html || `${product.product_name}の商品詳細です。`,

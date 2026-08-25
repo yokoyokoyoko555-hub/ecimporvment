@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   ochanokoCategoryName,
   ochanokoSubcategoryName,
+  ochanokoImagePath,
 } from "../lib/catalog-category";
 
 test("おちゃのこカテゴリはタイトル、サブカテゴリは収録名にする", () => {
@@ -14,6 +15,14 @@ test("おちゃのこカテゴリはタイトル、サブカテゴリは収録�
     ochanokoSubcategoryName("ブースターパック TIMELESS BONDS 【BT-26】"),
     "ブースターパック TIMELESS BONDS【BT-26】",
   );
+});
+
+test("デジモン画像はおちゃのこ上のDiGiMONフォルダを参照する", () => {
+  assert.equal(
+    ochanokoImagePath("digimon", "BT26-001.png"),
+    "DiGiMON/BT26-001.png",
+  );
+  assert.equal(ochanokoImagePath("digimon", null), null);
 });
 
 test("追加タイトルは表示名をカテゴリとして利用する", () => {
