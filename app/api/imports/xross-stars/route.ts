@@ -83,8 +83,8 @@ export async function POST(request: Request) {
           isParallel: card.isParallel,
         });
         await client.query(
-          `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory)
-           VALUES($1,$2,$3,$4,$5,$6)`,
+          `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory,sale_price,initial_stock)
+           VALUES($1,$2,$3,$4,$5,$6,0,0)`,
           [inserted.rows[0].id, productCode, productName, `${productCode}.png`, category, subcategory],
         );
       }

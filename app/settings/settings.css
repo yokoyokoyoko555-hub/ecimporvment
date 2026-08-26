@@ -64,6 +64,17 @@
 .templateContent .field {
   margin-bottom: 14px;
 }
+.templateContent textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+}
+.templatePreview > div {
+  white-space: pre-wrap;
+}
+.descriptionTemplates {
+  margin-top: 22px;
+}
 .templatePreview {
   display: grid;
   gap: 5px;

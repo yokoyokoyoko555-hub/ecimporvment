@@ -5,6 +5,10 @@ import { z } from "zod";
 import { pool } from "@/lib/db";
 import { csvLine, ochanokoHeaders } from "@/lib/csv";
 import { ochanokoImagePath } from "@/lib/catalog-category";
+import {
+  DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE,
+  renderProductDescription,
+} from "@/lib/product-description";
 
 interface ProductRow {
   product_code: string;
@@ -24,6 +28,9 @@ interface ProductRow {
   rarity: string | null;
   colors: string[];
   source_type: string;
+  set_name: string;
+  set_code: string | null;
+  description_template: string | null;
 }
 const querySchema = z.object({
   batch: z.string().uuid(),
@@ -34,8 +41,11 @@ async function load(batchId: string) {
   if (!pool) throw new Error("データベースが接続されていません");
   return (
     await pool.query<ProductRow>(
-      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.card_name,c.rarity,c.colors,b.source_type
-    FROM cards c JOIN products p ON p.card_id=c.id JOIN import_batches b ON b.id=c.import_batch_id
+      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.card_name,c.rarity,c.colors,b.source_type,b.set_name,b.set_code,d.template_text description_template
+    FROM cards c
+    JOIN products p ON p.card_id=c.id
+    JOIN import_batches b ON b.id=c.import_batch_id
+    LEFT JOIN product_description_templates d ON d.title_key=(CASE WHEN b.source_type LIKE 'manual:%' THEN substring(b.source_type from 8) ELSE b.source_type END)
     WHERE c.import_batch_id=$1 AND p.export_enabled=true ORDER BY c.card_number,c.variation_code,p.created_at`,
       [batchId],
     )
@@ -131,15 +141,29 @@ export async function GET(request: Request) {
         set("サブカテゴリ", product.subcategory);
         set("グループ", product.group_name);
         set("販売価格", product.sale_price);
+        set("ポイント発行の対象から除外する", 1);
         set("在庫数", product.initial_stock);
         set(
           "メイン写真1",
           ochanokoImagePath(product.source_type, product.image_file_name),
         );
-        set(
-          "説明",
-          product.description_html || `${product.product_name}の商品詳細です。`,
-        );
+        const description =
+          product.description_html ||
+          renderProductDescription(
+            product.description_template ||
+              DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE,
+            {
+              productName: product.product_name,
+              cardName: product.card_name,
+              rarity: product.rarity,
+              colors: product.colors,
+              cardNumber: product.card_number,
+              setName: product.set_name,
+              setCode: product.set_code,
+            },
+          );
+        set("説明", description);
+        set("説明（スマートフォン版）", description);
         set("SEO：タイトル", product.product_name);
         set(
           "SEO：ディスクリプション",

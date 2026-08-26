@@ -13,6 +13,11 @@ import "./settings.css";
 import "./code-rule.css";
 import "./product-code-import.css";
 import "./catalog-source-settings.css";
+import {
+  DescriptionTemplateSettings,
+  type DescriptionTemplateItem,
+} from "./description-template-settings";
+import { DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE } from "@/lib/product-description";
 
 export const dynamic = "force-dynamic";
 type CodeRule = {
@@ -42,6 +47,7 @@ export default async function SettingsPage() {
   ];
   let codeRule: CodeRule | null = null;
   let sources: CatalogSourceItem[] = [];
+  let descriptionItems: DescriptionTemplateItem[] = [];
   if (pool) {
     const result = await pool.query<{
       title_key: string;
@@ -87,6 +93,19 @@ export default async function SettingsPage() {
       scraperKey: row.scraper_key,
       defaultUrl: row.default_url || "",
       active: row.active ?? true,
+    }));
+    const descriptionResult = await pool.query<{
+      title_key: string;
+      display_name: string;
+      template_text: string | null;
+    }>(`SELECT n.title_key,n.display_name,d.template_text
+      FROM product_name_templates n
+      LEFT JOIN product_description_templates d ON d.title_key=n.title_key
+      ORDER BY n.created_at`);
+    descriptionItems = descriptionResult.rows.map((row) => ({
+      titleKey: row.title_key,
+      displayName: row.display_name,
+      templateText: row.template_text || DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE,
     }));
   }
   return (
@@ -147,6 +166,9 @@ export default async function SettingsPage() {
         </section>
       )}
       <NameTemplateSettings initialItems={items} />
+      {descriptionItems.length > 0 && (
+        <DescriptionTemplateSettings initialItems={descriptionItems} />
+      )}
     </>
   );
 }
