@@ -1,30 +1,7 @@
-export const PRODUCT_DESCRIPTION_FIELDS = [
-  "product_name",
-  "card_name",
-  "rarity",
-  "color",
-  "card_number",
-  "set_name",
-  "set_code",
-  "traits",
-] as const;
-
-export type ProductDescriptionField =
-  (typeof PRODUCT_DESCRIPTION_FIELDS)[number];
-
-export type ProductDescriptionValues = {
-  productName: string;
-  cardName: string;
-  rarity: string | null;
-  colors: string[];
-  cardNumber: string;
-  setName: string;
-  setCode: string | null;
-  traits: string | null;
-};
-
-export const DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE =
-  `<div class='product-info'>
+-- 既定の簡易テンプレートだけを標準の商品説明へ更新する。
+-- 運用画面で編集済みのテンプレートは上書きしない。
+UPDATE product_description_templates
+SET template_text = $template$<div class='product-info'>
   <div class='product-heading bold'>商品詳細</div>
   <div class='product-heading-line'></div>
   <div class='product-detail'>
@@ -50,25 +27,6 @@ export const DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE =
   発送方法・送料に関しては<a href='https://torecabinks.ocnk.net/help#help_charge' class='product-attention-text' target='_blank'>コチラ</a>をご確認ください。<br />
   入金確認から<span class='product-attention-text font-red'>24時間</span>以内に発送いたします。
   </div>
-</div>`;
-
-export function renderProductDescription(
-  templateText: string,
-  values: ProductDescriptionValues,
-) {
-  const replacements: Record<ProductDescriptionField, string> = {
-    product_name: values.productName,
-    card_name: values.cardName,
-    rarity: values.rarity || "",
-    color: values.colors.join("・"),
-    card_number: values.cardNumber,
-    set_name: values.setName,
-    set_code: values.setCode || "",
-    traits: values.traits || "",
-  };
-  return templateText.replace(/\{\{([a-z_]+)\}\}/g, (match, field) =>
-    field in replacements
-      ? replacements[field as ProductDescriptionField]
-      : match,
-  );
-}
+</div>$template$,
+    updated_at = now()
+WHERE template_text = '{{product_name}}<br />収録：{{set_name}}<br />型番：{{card_number}}';

@@ -30,6 +30,7 @@ interface ProductRow {
   source_type: string;
   set_name: string;
   set_code: string | null;
+  traits: string | null;
   description_template: string | null;
 }
 const querySchema = z.object({
@@ -41,7 +42,7 @@ async function load(batchId: string) {
   if (!pool) throw new Error("データベースが接続されていません");
   return (
     await pool.query<ProductRow>(
-      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.card_name,c.rarity,c.colors,b.source_type,b.set_name,b.set_code,d.template_text description_template
+      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.card_name,c.rarity,c.colors,c.traits,b.source_type,b.set_name,b.set_code,d.template_text description_template
     FROM cards c
     JOIN products p ON p.card_id=c.id
     JOIN import_batches b ON b.id=c.import_batch_id
@@ -160,6 +161,7 @@ export async function GET(request: Request) {
               cardNumber: product.card_number,
               setName: product.set_name,
               setCode: product.set_code,
+              traits: product.traits,
             },
           );
         set("説明", description);

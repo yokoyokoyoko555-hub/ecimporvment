@@ -52,6 +52,7 @@ export function DescriptionTemplateSettings({
             cardNumber: "XX01-001",
             setName: "ブースターパック サンプル【XX-01】",
             setCode: "XX-01",
+            traits: "超新星/麦わらの一味",
           });
           return (
             <details className="templateEditor" key={item.titleKey}>
@@ -102,7 +103,8 @@ export function DescriptionTemplateSettings({
         <code>{"{{color}}"}</code> 色、
         <code>{"{{card_number}}"}</code> 型番、
         <code>{"{{set_name}}"}</code> 収録名、
-        <code>{"{{set_code}}"}</code> セットコード
+        <code>{"{{set_code}}"}</code> セットコード、
+        <code>{"{{traits}}"}</code> 特徴
       </div>
       {message && <div className="notice templateMessage">{message}</div>}
     </section>
