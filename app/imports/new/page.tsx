@@ -11,7 +11,12 @@ export default async function NewImportPage() {
       title_key: string;
       display_name: string;
       source_name: string;
-      scraper_key: "digimon" | "onepiece" | "lorcana" | "xross-stars";
+      scraper_key:
+        | "digimon"
+        | "onepiece"
+        | "lorcana"
+        | "xross-stars"
+        | "harrypotter";
       default_url: string;
     }>(`SELECT s.title_key,t.display_name,s.source_name,s.scraper_key,s.default_url
       FROM catalog_sources s JOIN product_name_templates t ON t.title_key=s.title_key

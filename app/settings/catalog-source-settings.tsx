@@ -6,7 +6,13 @@ export type CatalogSourceItem = {
   displayName: string;
   sourceName: string;
   acquisitionMethod: "manual" | "scraping";
-  scraperKey: "digimon" | "onepiece" | "lorcana" | "xross-stars" | null;
+  scraperKey:
+    | "digimon"
+    | "onepiece"
+    | "lorcana"
+    | "xross-stars"
+    | "harrypotter"
+    | null;
   defaultUrl: string;
   active: boolean;
 };
@@ -131,6 +137,9 @@ export function CatalogSourceSettings({
                         </option>
                         <option value="xross-stars">
                           Xross Stars公式（対応済み）
+                        </option>
+                        <option value="harrypotter">
+                          ハリー・ポッター カードゲーム公式（対応済み）
                         </option>
                       </select>
                     </div>

@@ -80,6 +80,7 @@ export default async function SettingsPage() {
         | "onepiece"
         | "lorcana"
         | "xross-stars"
+        | "harrypotter"
         | null;
       default_url: string | null;
       active: boolean | null;

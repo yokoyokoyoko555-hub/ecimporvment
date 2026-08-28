@@ -8,7 +8,12 @@ export type ImportSource = {
   titleKey: string;
   displayName: string;
   sourceName: string;
-  scraperKey: "digimon" | "onepiece" | "lorcana" | "xross-stars";
+  scraperKey:
+    | "digimon"
+    | "onepiece"
+    | "lorcana"
+    | "xross-stars"
+    | "harrypotter";
   defaultUrl: string;
 };
 
@@ -27,6 +32,11 @@ function defaultSet(source: ImportSource | undefined) {
     return {
       name: "ブースターパック第4弾『Grand Resonance』【BP04】",
       code: "BP04",
+    };
+  if (source?.scraperKey === "harrypotter")
+    return {
+      name: "ブースターパック／『ハリー・ポッターと賢者の石』 Part.2",
+      code: "HP02",
     };
   return { name: "", code: "" };
 }
@@ -59,6 +69,8 @@ export function ImportForm({ sources }: { sources: ImportSource[] }) {
               ? "/api/imports/lorcana"
               : selected?.scraperKey === "xross-stars"
                 ? "/api/imports/xross-stars"
+                : selected?.scraperKey === "harrypotter"
+                  ? "/api/imports/harrypotter"
               : null;
       if (!endpoint) throw new Error("この取得元のスクレイパーは未対応です");
       const response = await fetch(endpoint, {
