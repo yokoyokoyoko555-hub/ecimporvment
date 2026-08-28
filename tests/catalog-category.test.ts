@@ -25,6 +25,13 @@ test("デジモン画像はおちゃのこ上のDiGiMONフォルダを参照す�
   assert.equal(ochanokoImagePath("digimon", null), null);
 });
 
+test("ハリー・ポッター画像はおちゃのこ上のHPフォルダを参照する", () => {
+  assert.equal(
+    ochanokoImagePath("harrypotter", "HP_02-001.png"),
+    "HP/HP_02-001.png",
+  );
+});
+
 test("追加タイトルは表示名をカテゴリとして利用する", () => {
   assert.equal(
     ochanokoCategoryName("future-title", "新しいカードタイトル"),

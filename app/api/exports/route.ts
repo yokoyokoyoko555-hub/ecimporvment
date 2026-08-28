@@ -10,6 +10,7 @@ import {
   renderProductDescription,
 } from "@/lib/product-description";
 import { compareProductsForExport } from "@/lib/product-sort";
+import { prepareImageForExport } from "@/lib/image-export";
 
 interface ProductRow {
   product_code: string;
@@ -231,7 +232,11 @@ export async function GET(request: Request) {
               signal: AbortSignal.timeout(15000),
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            zip.file(name, await response.arrayBuffer());
+            const downloaded = new Uint8Array(await response.arrayBuffer());
+            zip.file(
+              name,
+              await prepareImageForExport(product.source_type, downloaded),
+            );
             manifest.push(
               csvLine([
                 product.product_code,

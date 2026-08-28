@@ -16,6 +16,7 @@ export function ochanokoSubcategoryName(setName: string) {
 
 const OCHANOKO_IMAGE_FOLDERS: Record<string, string> = {
   digimon: "DiGiMON",
+  harrypotter: "HP",
 };
 
 export function ochanokoImagePath(
