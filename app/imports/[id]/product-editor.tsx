@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { needsDigimonSpReview } from "@/lib/product-review";
+import {
+  compareByRarityAndCardNumber,
+  rarityRank,
+} from "@/lib/product-sort";
 
 export interface EditableProduct {
   id: string | null;
@@ -44,32 +48,6 @@ export function ProductEditor({
   );
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const rarityOrder = [
-    "アイコニック",
-    "エンチャンテッド",
-    "エピック",
-    "スーパーパラレル",
-    "SEC",
-    "SP",
-    "レジェンダリー",
-    "リーダーパラレル",
-    "パラレル",
-    "L",
-    "スーパーレア",
-    "SR",
-    "レア",
-    "R",
-    "アンコモン",
-    "UC",
-    "U",
-    "コモン",
-    "C",
-    "P",
-  ];
-  const rarityRank = (rarity: string | null) => {
-    const rank = rarityOrder.indexOf(rarity || "");
-    return rank === -1 ? rarityOrder.length : rank;
-  };
   const availableRarities = Array.from(
     new Set(products.map((product) => product.rarity || "")),
   ).sort(
@@ -92,9 +70,10 @@ export function ProductEditor({
           .includes(filter.toLowerCase()),
     )
     .sort((a, b) => {
-      const cardOrder = a.cardNumber.localeCompare(b.cardNumber, "ja", {
-        numeric: true,
-      });
+      const cardOrder = compareByRarityAndCardNumber(
+        { ...a, rarity: null },
+        { ...b, rarity: null },
+      );
       if (sort === "rarity-desc")
         return rarityRank(a.rarity) - rarityRank(b.rarity) || cardOrder;
       if (sort === "rarity-asc")

@@ -9,6 +9,7 @@ import {
   DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE,
   renderProductDescription,
 } from "@/lib/product-description";
+import { compareByRarityAndCardNumber } from "@/lib/product-sort";
 
 interface ProductRow {
   product_code: string;
@@ -65,7 +66,12 @@ export async function GET(request: Request) {
         { error: "出力条件が正しくありません" },
         { status: 400 },
       );
-    const products = await load(parsed.data.batch);
+    const products = (await load(parsed.data.batch)).sort((a, b) =>
+      compareByRarityAndCardNumber(
+        { rarity: a.rarity, cardNumber: a.card_number },
+        { rarity: b.rarity, cardNumber: b.card_number },
+      ),
+    );
     if (!products.length)
       return NextResponse.json(
         { error: "出力対象の商品がありません" },
