@@ -99,16 +99,23 @@ export function ProductEditor({
     field: "salePrice" | "initialStock" | "departmentId" | "category" | "subcategory",
     value: string,
   ) {
+    const shownKeys = new Set(shown.map((product) => product.sourceKey));
     setProducts((current) =>
-      current.map((product) => ({
-        ...product,
-        [field]:
-          field === "departmentId" || field === "category" || field === "subcategory"
-            ? value
-            : value === ""
-              ? null
-              : Number(value),
-      })),
+      current.map((product) =>
+        shownKeys.has(product.sourceKey)
+          ? {
+              ...product,
+              [field]:
+                field === "departmentId" ||
+                field === "category" ||
+                field === "subcategory"
+                  ? value
+                  : value === ""
+                    ? null
+                    : Number(value),
+            }
+          : product,
+      ),
     );
   }
 
@@ -199,7 +206,7 @@ export function ProductEditor({
         </button>
       </div>
       <details className="bulkPanel">
-        <summary>一括編集</summary>
+        <summary>一括編集（表示中 {shown.length}件が対象）</summary>
         <div className="bulkGrid">
           <label>
             販売価格
@@ -242,7 +249,7 @@ export function ProductEditor({
           表示中のカードをすべて「傷あり商品も作成」にする
         </label>
         <p>
-          検索中は、表示されているカードだけが一括選択の対象です。入力後、上部の「すべて保存」を押してください。
+          検索・レアリティ絞り込み後に表示されているカードだけが一括編集の対象です。入力後、上部の「すべて保存」を押してください。
         </p>
       </details>
       {message && <div className="notice editorMessage">{message}</div>}
