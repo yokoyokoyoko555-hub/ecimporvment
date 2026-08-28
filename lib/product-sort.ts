@@ -64,6 +64,26 @@ function digimonVariationRank(sourceType: string, variationCode: string) {
   return 2;
 }
 
+function harryPotterStarRank(rarity: string | null) {
+  if ((rarity || "").includes("★★")) return 0;
+  if ((rarity || "").includes("★")) return 1;
+  return 2;
+}
+
+function compareHarryPotterRarity(
+  a: { rarity: string | null; cardNumber: string },
+  b: { rarity: string | null; cardNumber: string },
+) {
+  const starOrder =
+    harryPotterStarRank(a.rarity) - harryPotterStarRank(b.rarity);
+  if (starOrder) return starOrder;
+
+  const baseRarityOrder =
+    rarityRank((a.rarity || "").replaceAll("★", "")) -
+    rarityRank((b.rarity || "").replaceAll("★", ""));
+  return baseRarityOrder || compareCardNumber(a.cardNumber, b.cardNumber);
+}
+
 export function compareProductsForExport(
   a: {
     sourceType: string;
@@ -78,6 +98,10 @@ export function compareProductsForExport(
     cardNumber: string;
   },
 ) {
+  if (a.sourceType === "harrypotter" && b.sourceType === "harrypotter") {
+    return compareHarryPotterRarity(a, b);
+  }
+
   const variationOrder =
     digimonVariationRank(a.sourceType, a.variationCode) -
     digimonVariationRank(b.sourceType, b.variationCode);

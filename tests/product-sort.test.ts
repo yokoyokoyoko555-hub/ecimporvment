@@ -50,6 +50,31 @@ test("デジモン以外の出力は従来どおりレアリティ順になる",
   assert.equal(cards[0].rarity, "SEC");
 });
 
+test("ハリー・ポッター出力は★★、★、通常の各レアリティ・カード番号順になる", () => {
+  const cards = [
+    { sourceType: "harrypotter", variationCode: "N", rarity: "SR", cardNumber: "HP02-001" },
+    { sourceType: "harrypotter", variationCode: "N", rarity: "R★", cardNumber: "HP02-020" },
+    { sourceType: "harrypotter", variationCode: "N", rarity: "SR★★", cardNumber: "HP02-010" },
+    { sourceType: "harrypotter", variationCode: "N", rarity: "SR★", cardNumber: "HP02-011" },
+    { sourceType: "harrypotter", variationCode: "N", rarity: "R★★", cardNumber: "HP02-002" },
+    { sourceType: "harrypotter", variationCode: "N", rarity: "R", cardNumber: "HP02-003" },
+    { sourceType: "harrypotter", variationCode: "N", rarity: "R★", cardNumber: "HP02-004" },
+  ].sort(compareProductsForExport);
+
+  assert.deepEqual(
+    cards.map((card) => `${card.rarity}:${card.cardNumber}`),
+    [
+      "SR★★:HP02-010",
+      "R★★:HP02-002",
+      "SR★:HP02-011",
+      "R★:HP02-004",
+      "R★:HP02-020",
+      "SR:HP02-001",
+      "R:HP02-003",
+    ],
+  );
+});
+
 test("未定義レアリティは定義済みレアリティより後になる", () => {
   const cards = [
     { rarity: "UNKNOWN", cardNumber: "01-001" },
