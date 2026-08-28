@@ -9,7 +9,7 @@ import {
   DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE,
   renderProductDescription,
 } from "@/lib/product-description";
-import { compareByRarityAndCardNumber } from "@/lib/product-sort";
+import { compareProductsForExport } from "@/lib/product-sort";
 
 interface ProductRow {
   product_code: string;
@@ -25,6 +25,7 @@ interface ProductRow {
   image_file_name: string | null;
   source_image_url: string | null;
   card_number: string;
+  variation_code: string;
   card_name: string;
   rarity: string | null;
   colors: string[];
@@ -43,7 +44,7 @@ async function load(batchId: string) {
   if (!pool) throw new Error("データベースが接続されていません");
   return (
     await pool.query<ProductRow>(
-      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.card_name,c.rarity,c.colors,c.traits,b.source_type,b.set_name,b.set_code,d.template_text description_template
+      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.variation_code,c.card_name,c.rarity,c.colors,c.traits,b.source_type,b.set_name,b.set_code,d.template_text description_template
     FROM cards c
     JOIN products p ON p.card_id=c.id
     JOIN import_batches b ON b.id=c.import_batch_id
@@ -67,9 +68,19 @@ export async function GET(request: Request) {
         { status: 400 },
       );
     const products = (await load(parsed.data.batch)).sort((a, b) =>
-      compareByRarityAndCardNumber(
-        { rarity: a.rarity, cardNumber: a.card_number },
-        { rarity: b.rarity, cardNumber: b.card_number },
+      compareProductsForExport(
+        {
+          sourceType: a.source_type,
+          variationCode: a.variation_code,
+          rarity: a.rarity,
+          cardNumber: a.card_number,
+        },
+        {
+          sourceType: b.source_type,
+          variationCode: b.variation_code,
+          rarity: b.rarity,
+          cardNumber: b.card_number,
+        },
       ),
     );
     if (!products.length)
