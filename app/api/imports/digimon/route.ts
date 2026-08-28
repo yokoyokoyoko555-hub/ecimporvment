@@ -4,6 +4,7 @@ import { pool } from "@/lib/db";
 import { fetchDigimonCards } from "@/lib/digimon";
 import {
   DEFAULT_PRODUCT_NAME_TEMPLATES,
+  appendDigimonVariationLabel,
   renderProductName,
 } from "@/lib/product-name";
 import { ochanokoCategoryName, ochanokoSubcategoryName } from "@/lib/catalog-category";
@@ -109,14 +110,17 @@ export async function POST(request: Request) {
         /[^A-Za-z0-9_-]/g,
         "",
       );
-      const productName = renderProductName(template, {
-        name: card.cardName,
-        rarity: card.rarity,
-        colors: card.colors,
-        cardNumber: card.cardNumber,
-        setCode,
-        isParallel: card.isParallel,
-      });
+      const productName = appendDigimonVariationLabel(
+        renderProductName(template, {
+          name: card.cardName,
+          rarity: card.rarity,
+          colors: card.colors,
+          cardNumber: card.cardNumber,
+          setCode,
+          isParallel: card.isParallel,
+        }),
+        card.variationCode,
+      );
       await client.query(
         `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory,sale_price,initial_stock)
         VALUES($1,$2,$3,$4,$5,$6,0,0) ON CONFLICT(product_code) DO NOTHING`,

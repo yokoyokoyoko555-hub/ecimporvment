@@ -100,7 +100,6 @@ export default async function Page({
       <ProductEditor
         initialProducts={products}
         batchId={id}
-        sourceType={batch.source_type}
       />
     </>
   );

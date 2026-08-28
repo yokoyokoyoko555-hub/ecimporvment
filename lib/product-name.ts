@@ -15,3 +15,13 @@ export function renderProductName(template: ProductNameTemplate, values: Product
   const replacements: Record<ProductNameField, string> = { name: values.name, rarity: values.rarity || "", color, card_number: values.cardNumber, set_code: values.setCode || "", parallel: values.isParallel ? "パラレル" : "" };
   return template.templateText.replace(/\{\{([a-z_]+)\}\}/g, (match, key: string) => key in replacements ? replacements[key as ProductNameField] : match).trim();
 }
+
+export function appendDigimonVariationLabel(
+  productName: string,
+  variationCode: string,
+) {
+  const code = variationCode.toUpperCase();
+  const label = code === "P1" ? "【パラレル】" : code === "P2" ? "【SP・希少】" : "";
+  if (!label || productName.trimEnd().endsWith(label)) return productName;
+  return `${productName.trimEnd()}${label}`;
+}
