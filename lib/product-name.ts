@@ -11,7 +11,7 @@ export const DEFAULT_PRODUCT_NAME_TEMPLATES = {
 
 export function renderProductName(template: ProductNameTemplate, values: ProductNameValues) {
   const colors = values.colors || [];
-  const color = colors.length > 1 && template.multipleColorsLabel ? template.multipleColorsLabel : colors.join("・");
+  const color = colors.length > 1 && template.multipleColorsLabel ? template.multipleColorsLabel : colors.join("");
   const replacements: Record<ProductNameField, string> = { name: values.name, rarity: values.rarity || "", color, card_number: values.cardNumber, set_code: values.setCode || "", parallel: values.isParallel ? "パラレル" : "" };
   return template.templateText.replace(/\{\{([a-z_]+)\}\}/g, (match, key: string) => key in replacements ? replacements[key as ProductNameField] : match).trim();
 }

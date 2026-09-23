@@ -163,7 +163,7 @@ export function NameTemplateSettings({
                 />
               </div>
               <div className="field">
-                <label>複数色の場合の表示（空欄なら「赤・青」）</label>
+                <label>複数色の場合の表示（空欄なら「赤青」）</label>
                 <input
                   value={item.multipleColorsLabel || ""}
                   onChange={(event) =>
