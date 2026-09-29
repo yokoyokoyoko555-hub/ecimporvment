@@ -5,6 +5,8 @@ export const csvCell = (value: unknown) => {
 
 export const csvLine = (values: unknown[]) => values.map(csvCell).join(",");
 
+export const OCHANOKO_DEFAULT_PUBLICATION_STATUS = "準備中";
+
 export function ochanokoHeaders() {
   const headers = [
     "商品番号", "商品名", "カテゴリ", "サブカテゴリ", "型番/品番", "JANコード", "グループ",

@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ochanokoHeaders } from "../lib/csv";
+import {
+  OCHANOKO_DEFAULT_PUBLICATION_STATUS,
+  ochanokoHeaders,
+} from "../lib/csv";
 
 test("おちゃのこ最新版CSVは193列を所定の順序で出力する", () => {
   const headers = ochanokoHeaders();
@@ -29,4 +32,8 @@ test("おちゃのこ最新版CSVは193列を所定の順序で出力する", ()
   assert.equal(headers[192], "管理用メモ");
   assert.equal(headers.includes("garittoカテゴリー"), false);
   assert.equal(headers.includes("説明（スマートフォン版）"), false);
+});
+
+test("おちゃのこ取込時の公開状態は準備中を既定値にする", () => {
+  assert.equal(OCHANOKO_DEFAULT_PUBLICATION_STATUS, "準備中");
 });

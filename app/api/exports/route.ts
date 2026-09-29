@@ -3,7 +3,11 @@ import JSZip from "jszip";
 import iconv from "iconv-lite";
 import { z } from "zod";
 import { pool } from "@/lib/db";
-import { csvLine, ochanokoHeaders } from "@/lib/csv";
+import {
+  csvLine,
+  OCHANOKO_DEFAULT_PUBLICATION_STATUS,
+  ochanokoHeaders,
+} from "@/lib/csv";
 import { ochanokoImagePath } from "@/lib/catalog-category";
 import {
   DEFAULT_PRODUCT_DESCRIPTION_TEMPLATE,
@@ -188,6 +192,7 @@ export async function GET(request: Request) {
           "SEO：ディスクリプション",
           `${product.product_name}の商品詳細です。`,
         );
+        set("公開状態", OCHANOKO_DEFAULT_PUBLICATION_STATUS);
         return csvLine(values);
       });
       return file(
