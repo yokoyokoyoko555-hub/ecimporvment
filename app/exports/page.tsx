@@ -64,7 +64,7 @@ export default async function Page({
     {
       title: "おちゃのこネットCSV",
       type: "ochanoko",
-      description: "204列・CP932形式（販売価格・在庫・部門IDは空欄可）",
+      description: "193列・UTF-8形式（販売価格・在庫・部門IDは空欄可）",
       reason: ochanokoReason,
     },
     {

@@ -143,13 +143,13 @@ export async function GET(request: Request) {
           { status: 422 },
         );
       const headers = ochanokoHeaders();
-      if (headers.length !== 204)
+      if (headers.length !== 193)
         return NextResponse.json(
           { error: `おちゃのこCSVの列数エラーです（${headers.length}列）` },
           { status: 500 },
         );
       const rows = products.map((product) => {
-        const values = Array(204).fill("");
+        const values = Array(193).fill("");
         const set = (name: string, value: unknown) => {
           const index = headers.indexOf(name);
           if (index >= 0) values[index] = value ?? "";
@@ -160,10 +160,10 @@ export async function GET(request: Request) {
         set("サブカテゴリ", product.subcategory);
         set("グループ", product.group_name);
         set("販売価格", product.sale_price);
-        set("ポイント発行の対象から除外する", 1);
+        set("ポイント発行除外", 1);
         set("在庫数", product.initial_stock);
         set(
-          "メイン写真1",
+          "メイン写真",
           ochanokoImagePath(product.source_type, product.image_file_name),
         );
         const description =
@@ -183,7 +183,6 @@ export async function GET(request: Request) {
             },
           );
         set("説明", description);
-        set("説明（スマートフォン版）", description);
         set("SEO：タイトル", product.product_name);
         set(
           "SEO：ディスクリプション",
@@ -192,9 +191,9 @@ export async function GET(request: Request) {
         return csvLine(values);
       });
       return file(
-        iconv.encode(
-          [csvLine(headers), ...rows].join("\r\n") + "\r\n",
-          "cp932",
+        Buffer.from(
+          `\uFEFF${[csvLine(headers), ...rows].join("\r\n")}\r\n`,
+          "utf8",
         ),
         "text/csv",
         "ochanoko.csv",
