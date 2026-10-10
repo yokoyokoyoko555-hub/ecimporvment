@@ -34,3 +34,24 @@ test("他タイトルの画像は500KB以上でも加工しない", async () => 
   const output = await prepareImageForExport("digimon", input);
   assert.equal(output, input);
 });
+
+test("ワンピースのWebP画像を実データもPNGへ変換する", async () => {
+  const input = await sharp({
+    create: {
+      width: 32,
+      height: 48,
+      channels: 4,
+      background: { r: 220, g: 20, b: 60, alpha: 1 },
+    },
+  })
+    .webp()
+    .toBuffer();
+  assert.equal((await sharp(input).metadata()).format, "webp");
+
+  const output = await prepareImageForExport("onepiece", input);
+  const metadata = await sharp(output).metadata();
+  assert.equal(metadata.format, "png");
+  assert.deepEqual(Array.from(output.slice(0, 8)), [
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+  ]);
+});

@@ -6,6 +6,14 @@ export async function prepareImageForExport(
   sourceType: string,
   input: Uint8Array,
 ) {
+  // ONE PIECEの取得元にはWebP画像を配信するサイトがある一方、
+  // おちゃのこCSVと画像ZIPでは.pngのファイル名を使用する。
+  // 拡張子だけの変更にならないよう、画像本体も必ずPNGへ統一する。
+  if (sourceType === "onepiece")
+    return sharp(input)
+      .png({ compressionLevel: 9, effort: 10 })
+      .toBuffer();
+
   if (
     sourceType !== "harrypotter" ||
     input.byteLength < HARRY_POTTER_IMAGE_LIMIT_BYTES
