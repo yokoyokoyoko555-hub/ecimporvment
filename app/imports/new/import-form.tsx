@@ -58,7 +58,7 @@ export function ImportForm({ sources }: { sources: ImportSource[] }) {
     if (submitting.current) return;
     submitting.current = true;
     setLoading(true);
-    setMessage("公式サイトからカード情報を取得しています…");
+    setMessage("カード情報取得元からデータを取得しています…");
     try {
       const endpoint =
         selected?.scraperKey === "digimon"
@@ -178,7 +178,7 @@ export function ImportForm({ sources }: { sources: ImportSource[] }) {
             <span className="scrapingSpinner" aria-hidden="true" />
             <h2>スクレイピング中</h2>
             <p>
-              公式サイトからカード情報を取得しています。
+              カード情報取得元からデータを取得しています。
               <br />
               画面を閉じずにそのままお待ちください。
             </p>

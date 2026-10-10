@@ -130,7 +130,7 @@ export function CatalogSourceSettings({
                           デジモンカード公式（対応済み）
                         </option>
                         <option value="onepiece">
-                          ONE PIECEカードゲーム公式（対応済み）
+                          ONE PIECEカード（公式／ティアワンメディア・対応済み）
                         </option>
                         <option value="lorcana">
                           ディズニー・ロルカナ公式（対応済み）

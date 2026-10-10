@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseOnePieceCards } from "../lib/onepiece";
+import {
+  parseOnePieceCards,
+  parseTierOneOnePieceCards,
+} from "../lib/onepiece";
 
 const card = (id: string, image: string) => `
   <dl class="modalCol" id="${id}">
@@ -28,6 +31,57 @@ test("ONE PIECE公式カードリストの通常・パラレルを解析する",
   assert.equal(cards[0].playCost, 7);
   assert.equal(cards[0].dp, 7000);
   assert.equal(cards[2].imageUrl, "https://www.onepiece-cardgame.com/images/p2.png");
+});
+
+test("ティアワンメディアのプロモカード詳細を解析する", () => {
+  const html = `
+    <p class="wp-block-paragraph"><span class="swl-fz">P-122<span>|</span>P<span>|</span>LEADER</span></p>
+    <p class="wp-block-paragraph"><strong><span>エース＆サボ＆ルフィ</span></strong></p>
+    <div class="wp-block-columns">
+      <figure class="wp-block-image"><img data-src="https://tierone-media-op.com/wp-content/uploads/p-122.webp?x=1"></figure>
+      <table><tbody>
+        <tr><td><strong>ライフ</strong></td><td>5</td><td><strong>属性</strong></td><td>打</td></tr>
+        <tr><td><strong>パワー</strong></td><td>5000</td><td><strong>色</strong></td><td>赤</td></tr>
+        <tr><td colspan="4"><strong>特徴</strong><br>海軍</td></tr>
+        <tr><td colspan="4"><strong>テキスト</strong><br>カードの効果</td></tr>
+      </tbody></table>
+    </div>`;
+
+  const cards = parseTierOneOnePieceCards(
+    html,
+    "https://tier-one-onepiece.jp/blog/sample/",
+  );
+  assert.equal(cards.length, 1);
+  assert.deepEqual(cards[0], {
+    sourceKey: "tierone-p-122-1",
+    cardNumber: "P-122",
+    variationCode: "N",
+    rarity: "P",
+    cardType: "LEADER",
+    level: null,
+    isParallel: false,
+    cardName: "エース＆サボ＆ルフィ",
+    colors: ["赤"],
+    playCost: null,
+    dp: 5000,
+    form: null,
+    attribute: "打",
+    traits: "海軍",
+    upperText: null,
+    lowerText: "カードの効果",
+    imageUrl: "https://tierone-media-op.com/wp-content/uploads/p-122.webp",
+  });
+});
+
+test("ティアワンメディアの概要表はカード詳細として誤検出しない", () => {
+  const html = `<table><tr><td>P-122</td><td>P</td><td>エース＆サボ＆ルフィ</td></tr></table>`;
+  assert.deepEqual(
+    parseTierOneOnePieceCards(
+      html,
+      "https://tier-one-onepiece.jp/blog/sample/",
+    ),
+    [],
+  );
 });
 
 test("リーダーの別イラストはリーダーパラレルとして扱う", () => {

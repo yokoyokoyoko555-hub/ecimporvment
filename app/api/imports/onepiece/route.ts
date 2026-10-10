@@ -17,11 +17,12 @@ const schema = z
   })
   .superRefine((value, context) => {
     const host = new URL(value.sourceUrl).hostname.replace(/^www\./, "");
-    if (host !== "onepiece-cardgame.com")
+    if (!["onepiece-cardgame.com", "tier-one-onepiece.jp"].includes(host))
       context.addIssue({
         code: "custom",
         path: ["sourceUrl"],
-        message: "ONE PIECEカードゲーム公式URLを入力してください",
+        message:
+          "ONE PIECEカードゲーム公式またはティアワンメディアのカードリストURLを入力してください",
       });
   });
 
@@ -102,7 +103,13 @@ export async function POST(request: Request) {
             card.upperText,
             card.lowerText,
             card.imageUrl,
-            JSON.stringify(card),
+            JSON.stringify({
+              ...card,
+              sourceProvider: new URL(sourceUrl).hostname
+                .replace(/^www\./, "") === "tier-one-onepiece.jp"
+                ? "ティアワンメディア（非公式）"
+                : "ONE PIECEカードゲーム公式",
+            }),
           ],
         );
         const productCode = await resolveProductCode(

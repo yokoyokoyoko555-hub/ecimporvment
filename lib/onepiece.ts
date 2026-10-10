@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import type { AnyNode } from "domhandler";
 import type { DigimonCard } from "@/lib/digimon";
 
 const clean = (value: string | undefined) => value?.replace(/\s+/g, " ").trim() || null;
@@ -51,10 +52,107 @@ export function parseOnePieceCards(html: string, pageUrl: string): DigimonCard[]
   return cards;
 }
 
+function tableValue(
+  $: cheerio.CheerioAPI,
+  table: cheerio.Cheerio<AnyNode>,
+  label: string,
+) {
+  let value: string | null = null;
+  table.find("tr").each((_, row) => {
+    const cells = $(row).find("td");
+    cells.each((index, cell) => {
+      if (clean($(cell).find("strong").first().text()) === label) {
+        value = clean(cells.eq(index + 1).text());
+      }
+    });
+  });
+  return value;
+}
+
+function fullWidthAmpersand(value: string | null) {
+  return value?.replace(/&/g, "＆") || value;
+}
+
+/**
+ * ティアワンメディアの記事型カードリストを解析する。
+ * 記事中の概要表ではなく、カード詳細ブロックだけを対象にする。
+ */
+export function parseTierOneOnePieceCards(
+  html: string,
+  pageUrl: string,
+): DigimonCard[] {
+  const $ = cheerio.load(html);
+  const cards: DigimonCard[] = [];
+
+  $("p.wp-block-paragraph").each((_, element) => {
+    const metadata = clean($(element).text());
+    const match = metadata?.match(
+      /^([A-Z][A-Z0-9]*-\d+)\s*\|\s*([^|]+)\s*\|\s*([^|]+)$/i,
+    );
+    if (!match) return;
+
+    const metadataNode = $(element);
+    const nameNode = metadataNode.nextAll("p.wp-block-paragraph").first();
+    const detail = nameNode.nextAll("div.wp-block-columns").first();
+    const cardName = fullWidthAmpersand(clean(nameNode.text()));
+    const image = detail.find("figure.wp-block-image img").first();
+    const rawImage = image.attr("data-src") || image.attr("src");
+    const table = detail.find("table").first();
+    if (!cardName || !rawImage || !table.length) return;
+
+    const cardNumber = match[1].toUpperCase();
+    const rarity = clean(match[2]);
+    const cardType = clean(match[3]);
+    const color = tableValue($, table, "色");
+    const cost = tableValue($, table, "コスト");
+    const power = tableValue($, table, "パワー");
+    const attribute = tableValue($, table, "属性");
+    let traits: string | null = null;
+    let effect: string | null = null;
+    table.find("td[colspan]").each((__, cell) => {
+      const label = clean($(cell).find("strong").first().text());
+      const clone = $(cell).clone();
+      clone.find("strong").first().remove();
+      const value = clean(clone.text());
+      if (label === "特徴") traits = value;
+      if (label === "テキスト") effect = value;
+    });
+
+    cards.push({
+      sourceKey: `tierone-${cardNumber.toLowerCase()}-${cards.length + 1}`,
+      cardNumber,
+      variationCode: "N",
+      rarity,
+      cardType,
+      level: null,
+      isParallel: false,
+      cardName,
+      colors: (color || "")
+        .split(/[\/・]/)
+        .map((value) => value.trim())
+        .filter(Boolean),
+      playCost: integer(cost),
+      dp: integer(power),
+      form: null,
+      attribute,
+      traits,
+      upperText: null,
+      lowerText: effect,
+      imageUrl: new URL(rawImage.split("?")[0], pageUrl).toString(),
+    });
+  });
+
+  return cards;
+}
+
 export async function fetchOnePieceCards(url: string) {
   const response = await fetch(url, { headers: { "User-Agent": "CardFlow/0.1 (+product registration; low-frequency fetch)" }, signal: AbortSignal.timeout(30_000) });
-  if (!response.ok) throw new Error(`ONE PIECE公式サイトの取得に失敗しました（HTTP ${response.status}）`);
-  const cards = parseOnePieceCards(await response.text(), url);
-  if (!cards.length) throw new Error("カード情報を検出できませんでした。シリーズを選択した公式カードリストURLか確認してください。");
+  if (!response.ok) throw new Error(`ONE PIECEカード情報の取得に失敗しました（HTTP ${response.status}）`);
+  const html = await response.text();
+  const hostname = new URL(url).hostname.replace(/^www\./, "");
+  const cards = hostname === "tier-one-onepiece.jp"
+    ? parseTierOneOnePieceCards(html, url)
+    : parseOnePieceCards(html, url);
+  if (!cards.length) throw new Error("カード情報を検出できませんでした。対応済みのカードリストURLか確認してください。");
   return cards;
 }
