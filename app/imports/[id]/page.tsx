@@ -73,7 +73,10 @@ export default async function Page({
     initialStock: row.initial_stock,
     departmentId: row.department_id || "",
     category: row.category || defaultCategory,
-    subcategory: row.subcategory || defaultSubcategory,
+    subcategory:
+      batch.source_type === "onepiece"
+        ? row.subcategory || ""
+        : row.subcategory || defaultSubcategory,
     exportEnabled: row.export_enabled ?? true,
     isDamaged: row.product_code?.endsWith("dmg") ?? false,
     createDamaged: false,
@@ -100,6 +103,7 @@ export default async function Page({
       <ProductEditor
         initialProducts={products}
         batchId={id}
+        sourceType={batch.source_type}
       />
     </>
   );

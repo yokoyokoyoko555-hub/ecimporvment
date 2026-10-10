@@ -165,7 +165,10 @@ export async function POST(request: Request) {
       [parsed.data.batchId],
     );
     const result = await client.query<{ count: string }>(
-      `SELECT count(*) FROM cards ca JOIN LATERAL(SELECT px.* FROM products px JOIN cards pc ON pc.id=px.card_id WHERE pc.card_number=ca.card_number AND pc.variation_code=ca.variation_code AND px.export_enabled=true LIMIT 1)p ON true WHERE ca.import_batch_id=$1 AND(p.category IS NULL OR trim(p.category)='' OR p.subcategory IS NULL OR trim(p.subcategory)='' OR p.product_code='')`,
+      `SELECT count(*) FROM cards ca
+       JOIN import_batches b ON b.id=ca.import_batch_id
+       JOIN LATERAL(SELECT px.* FROM products px JOIN cards pc ON pc.id=px.card_id WHERE pc.card_number=ca.card_number AND pc.variation_code=ca.variation_code AND px.export_enabled=true LIMIT 1)p ON true
+       WHERE ca.import_batch_id=$1 AND(p.category IS NULL OR trim(p.category)='' OR (b.source_type<>'onepiece' AND (p.subcategory IS NULL OR trim(p.subcategory)='')) OR p.product_code='')`,
       [parsed.data.batchId],
     );
     const missing = Number(result.rows[0].count);

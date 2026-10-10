@@ -2,11 +2,13 @@ import Link from "next/link";
 import { listBatches } from "@/lib/repository";
 import { pool } from "@/lib/db";
 import { DownloadButton } from "./download-button";
+import { OchanokoSmaregiConverter } from "./ochanoko-smaregi-converter";
 import "./exports.css";
 import "./export-status.css";
 
 export const dynamic = "force-dynamic";
 type Status = {
+  source_type: string;
   total: string;
   missing_price: string;
   missing_department: string;
@@ -25,6 +27,7 @@ export default async function Page({
   const batches = await listBatches();
   const id = query.batch || batches[0]?.id;
   let status: Status = {
+    source_type: "",
     total: "0",
     missing_price: "0",
     missing_department: "0",
@@ -35,14 +38,14 @@ export default async function Page({
   };
   if (id && pool) {
     const result = await pool.query<Status>(
-      `SELECT count(*)::text total,
+      `SELECT max(b.source_type) source_type,count(*)::text total,
       count(*) FILTER(WHERE p.sale_price IS NULL)::text missing_price,
       count(*) FILTER(WHERE p.department_id IS NULL OR trim(p.department_id)='')::text missing_department,
       count(*) FILTER(WHERE p.category IS NULL OR trim(p.category)='')::text missing_category,
       count(*) FILTER(WHERE p.subcategory IS NULL OR trim(p.subcategory)='')::text missing_subcategory,
       count(*) FILTER(WHERE p.product_code IS NULL OR trim(p.product_code)='')::text missing_code,
       count(*) FILTER(WHERE c.source_image_url IS NULL OR trim(c.source_image_url)='')::text missing_image
-      FROM cards c JOIN products p ON p.card_id=c.id WHERE c.import_batch_id=$1 AND p.export_enabled=true`,
+      FROM cards c JOIN products p ON p.card_id=c.id JOIN import_batches b ON b.id=c.import_batch_id WHERE c.import_batch_id=$1 AND p.export_enabled=true`,
       [id],
     );
     status = result.rows[0] || status;
@@ -52,9 +55,12 @@ export default async function Page({
     subcategory = Number(status.missing_subcategory),
     code = Number(status.missing_code),
     missingImage = Number(status.missing_image);
+  const requiredSubcategory = status.source_type !== "onepiece";
   const ochanokoReason =
-    code || category || subcategory
-      ? `未入力があります：商品コード ${code}件・カテゴリ ${category}件・サブカテゴリ ${subcategory}件`
+    code || category || (requiredSubcategory && subcategory)
+      ? requiredSubcategory
+        ? `未入力があります：商品コード ${code}件・カテゴリ ${category}件・サブカテゴリ ${subcategory}件`
+        : `未入力があります：商品コード ${code}件・カテゴリ ${category}件`
       : null;
   const smaregiReason =
     code || department
@@ -137,6 +143,7 @@ export default async function Page({
           )}
         </div>
       </section>
+      <OchanokoSmaregiConverter />
     </>
   );
 }

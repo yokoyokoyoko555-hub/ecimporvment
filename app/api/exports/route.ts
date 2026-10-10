@@ -137,12 +137,14 @@ export async function GET(request: Request) {
     if (parsed.data.type === "ochanoko") {
       const invalid = products.filter(
         (product) =>
-          !product.category || !product.subcategory || !product.product_code,
+          !product.category ||
+          (product.source_type !== "onepiece" && !product.subcategory) ||
+          !product.product_code,
       );
       if (invalid.length)
         return NextResponse.json(
           {
-            error: `おちゃのこ必須項目が未入力の商品が${invalid.length}件あります。カテゴリ・サブカテゴリ・商品コードを確認してください。`,
+            error: `おちゃのこ必須項目が未入力の商品が${invalid.length}件あります。カテゴリ・商品コード${products[0]?.source_type === "onepiece" ? "" : "・サブカテゴリ"}を確認してください。`,
           },
           { status: 422 },
         );

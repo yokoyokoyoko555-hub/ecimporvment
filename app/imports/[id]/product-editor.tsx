@@ -32,9 +32,11 @@ export interface EditableProduct {
 export function ProductEditor({
   initialProducts,
   batchId,
+  sourceType,
 }: {
   initialProducts: EditableProduct[];
   batchId: string;
+  sourceType: string;
 }) {
   const [products, setProducts] = useState(initialProducts);
   const [filter, setFilter] = useState("");
@@ -44,6 +46,13 @@ export function ProductEditor({
   );
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [bulkValues, setBulkValues] = useState({
+    salePrice: "",
+    initialStock: "",
+    departmentId: "",
+    category: "",
+    subcategory: "",
+  });
   const availableRarities = Array.from(
     new Set(products.map((product) => product.rarity || "")),
   ).sort(
@@ -80,7 +89,9 @@ export function ProductEditor({
   const invalid = products.filter(
     (product) =>
       product.exportEnabled &&
-      (!product.category || !product.subcategory || !product.productCode),
+      (!product.category ||
+        (sourceType !== "onepiece" && !product.subcategory) ||
+        !product.productCode),
   ).length;
 
   function update(
@@ -95,10 +106,11 @@ export function ProductEditor({
     );
   }
 
-  function bulk(
+  function applyBulk(
     field: "salePrice" | "initialStock" | "departmentId" | "category" | "subcategory",
-    value: string,
+    clear = false,
   ) {
+    const value = clear ? "" : bulkValues[field];
     const shownKeys = new Set(shown.map((product) => product.sourceKey));
     setProducts((current) =>
       current.map((product) =>
@@ -116,6 +128,9 @@ export function ProductEditor({
             }
           : product,
       ),
+    );
+    setMessage(
+      `表示中の${shownKeys.size}件へ${clear ? "空欄" : "入力値"}を反映しました。「すべて保存」で確定してください。`,
     );
   }
 
@@ -213,30 +228,53 @@ export function ProductEditor({
             <input
               type="number"
               min="0"
-              onChange={(event) => bulk("salePrice", event.target.value)}
+              value={bulkValues.salePrice}
+              onChange={(event) =>
+                setBulkValues((current) => ({
+                  ...current,
+                  salePrice: event.target.value,
+                }))
+              }
             />
+            <span className="bulkButtons"><button type="button" onClick={() => applyBulk("salePrice")}>反映</button><button type="button" onClick={() => applyBulk("salePrice", true)}>空欄にする</button></span>
           </label>
           <label>
             在庫
             <input
               type="number"
               min="0"
-              onChange={(event) => bulk("initialStock", event.target.value)}
+              value={bulkValues.initialStock}
+              onChange={(event) =>
+                setBulkValues((current) => ({
+                  ...current,
+                  initialStock: event.target.value,
+                }))
+              }
             />
+            <span className="bulkButtons"><button type="button" onClick={() => applyBulk("initialStock")}>反映</button><button type="button" onClick={() => applyBulk("initialStock", true)}>空欄にする</button></span>
           </label>
           <label>
             部門ID
             <input
-              onChange={(event) => bulk("departmentId", event.target.value)}
+              value={bulkValues.departmentId}
+              onChange={(event) =>
+                setBulkValues((current) => ({
+                  ...current,
+                  departmentId: event.target.value,
+                }))
+              }
             />
+            <span className="bulkButtons"><button type="button" onClick={() => applyBulk("departmentId")}>反映</button><button type="button" onClick={() => applyBulk("departmentId", true)}>空欄にする</button></span>
           </label>
           <label>
             カテゴリ（タイトル）
-            <input onChange={(event) => bulk("category", event.target.value)} />
+            <input value={bulkValues.category} onChange={(event) => setBulkValues((current) => ({ ...current, category: event.target.value }))} />
+            <span className="bulkButtons"><button type="button" onClick={() => applyBulk("category")}>反映</button><button type="button" onClick={() => applyBulk("category", true)}>空欄にする</button></span>
           </label>
           <label>
-            サブカテゴリ（収録名）
-            <input onChange={(event) => bulk("subcategory", event.target.value)} />
+            サブカテゴリ（収録名）{sourceType === "onepiece" ? "・任意" : ""}
+            <input value={bulkValues.subcategory} onChange={(event) => setBulkValues((current) => ({ ...current, subcategory: event.target.value }))} />
+            <span className="bulkButtons"><button type="button" onClick={() => applyBulk("subcategory")}>反映</button><button type="button" onClick={() => applyBulk("subcategory", true)}>空欄にする</button></span>
           </label>
         </div>
         <label className="bulkDamaged">
@@ -249,7 +287,7 @@ export function ProductEditor({
           表示中のカードをすべて「傷あり商品も作成」にする
         </label>
         <p>
-          検索・レアリティ絞り込み後に表示されているカードだけが一括編集の対象です。入力後、上部の「すべて保存」を押してください。
+          検索・レアリティ絞り込み後に表示されているカードだけが一括編集の対象です。「反映」または「空欄にする」の後、上部の「すべて保存」を押してください。
         </p>
       </details>
       {message && <div className="notice editorMessage">{message}</div>}
@@ -353,7 +391,10 @@ export function ProductEditor({
                 />
               </div>
               <div className="field">
-                <label>おちゃのこサブカテゴリ（収録名）</label>
+                <label>
+                  おちゃのこサブカテゴリ（収録名）
+                  {sourceType === "onepiece" ? "・任意" : ""}
+                </label>
                 <input
                   value={product.subcategory}
                   onChange={(event) =>
