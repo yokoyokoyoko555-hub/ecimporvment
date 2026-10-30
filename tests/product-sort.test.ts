@@ -55,6 +55,27 @@ test("ワンピース出力はレアリティ順、型番順になる", () => {
   );
 });
 
+test("ワンピースのSPはSECを挟まず、傷ありを通常商品の直後にまとめる", () => {
+  const cards = [
+    { sourceType: "onepiece", variationCode: "P3", rarity: "SP", cardNumber: "EB05-055" },
+    { sourceType: "onepiece", variationCode: "N", rarity: "SEC", cardNumber: "EB05-061" },
+    { sourceType: "onepiece", variationCode: "P3D", rarity: "SP", cardNumber: "EB05-006" },
+    { sourceType: "onepiece", variationCode: "P3", rarity: "SP", cardNumber: "EB05-006" },
+    { sourceType: "onepiece", variationCode: "P3D", rarity: "SP", cardNumber: "EB05-055" },
+  ].sort(compareProductsForExport);
+
+  assert.deepEqual(
+    cards.map((card) => `${card.rarity}:${card.cardNumber}:${card.variationCode}`),
+    [
+      "SP:EB05-006:P3",
+      "SP:EB05-006:P3D",
+      "SP:EB05-055:P3",
+      "SP:EB05-055:P3D",
+      "SEC:EB05-061:N",
+    ],
+  );
+});
+
 test("傷あり商品は対応する通常商品の直後になる", () => {
   const cards = [
     { sourceType: "onepiece", variationCode: "ND", rarity: "SR", cardNumber: "EB05-002" },
