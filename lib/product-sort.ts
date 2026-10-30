@@ -56,6 +56,21 @@ function compareCardNumber(a: string, b: string) {
   });
 }
 
+function compareVariationAndDamage(a: string, b: string) {
+  const normalizedA = a.toUpperCase();
+  const normalizedB = b.toUpperCase();
+  const damagedA = normalizedA.endsWith("D");
+  const damagedB = normalizedB.endsWith("D");
+  const baseA = damagedA ? normalizedA.slice(0, -1) : normalizedA;
+  const baseB = damagedB ? normalizedB.slice(0, -1) : normalizedB;
+  const baseOrder = baseA.localeCompare(baseB, "ja", {
+    numeric: true,
+    sensitivity: "base",
+  });
+  if (baseOrder) return baseOrder;
+  return Number(damagedA) - Number(damagedB);
+}
+
 function digimonVariationRank(sourceType: string, variationCode: string) {
   if (sourceType !== "digimon") return 2;
   const code = variationCode.toUpperCase();
@@ -99,7 +114,10 @@ export function compareProductsForExport(
   },
 ) {
   if (a.sourceType === "harrypotter" && b.sourceType === "harrypotter") {
-    return compareHarryPotterRarity(a, b);
+    return (
+      compareHarryPotterRarity(a, b) ||
+      compareVariationAndDamage(a.variationCode, b.variationCode)
+    );
   }
 
   const variationOrder =
@@ -108,6 +126,13 @@ export function compareProductsForExport(
   if (variationOrder) return variationOrder;
 
   const variationRank = digimonVariationRank(a.sourceType, a.variationCode);
-  if (variationRank < 2) return compareCardNumber(a.cardNumber, b.cardNumber);
-  return compareByRarityAndCardNumber(a, b);
+  if (variationRank < 2)
+    return (
+      compareCardNumber(a.cardNumber, b.cardNumber) ||
+      compareVariationAndDamage(a.variationCode, b.variationCode)
+    );
+  return (
+    compareByRarityAndCardNumber(a, b) ||
+    compareVariationAndDamage(a.variationCode, b.variationCode)
+  );
 }

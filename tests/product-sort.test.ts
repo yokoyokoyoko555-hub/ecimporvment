@@ -42,12 +42,39 @@ test("デジモン出力はP2、P1、通常レアリティ順になる", () => {
   );
 });
 
-test("デジモン以外の出力は従来どおりレアリティ順になる", () => {
+test("ワンピース出力はレアリティ順、型番順になる", () => {
   const cards = [
-    { sourceType: "onepiece", variationCode: "P2", rarity: "R", cardNumber: "OP01-001" },
-    { sourceType: "onepiece", variationCode: "N", rarity: "SEC", cardNumber: "OP01-100" },
+    { sourceType: "onepiece", variationCode: "N", rarity: "R", cardNumber: "EB05-001" },
+    { sourceType: "onepiece", variationCode: "N", rarity: "SR", cardNumber: "EB05-010" },
+    { sourceType: "onepiece", variationCode: "N", rarity: "SEC", cardNumber: "EB05-061" },
+    { sourceType: "onepiece", variationCode: "N", rarity: "SR", cardNumber: "EB05-002" },
   ].sort(compareProductsForExport);
-  assert.equal(cards[0].rarity, "SEC");
+  assert.deepEqual(
+    cards.map((card) => `${card.rarity}:${card.cardNumber}`),
+    ["SEC:EB05-061", "SR:EB05-002", "SR:EB05-010", "R:EB05-001"],
+  );
+});
+
+test("傷あり商品は対応する通常商品の直後になる", () => {
+  const cards = [
+    { sourceType: "onepiece", variationCode: "ND", rarity: "SR", cardNumber: "EB05-002" },
+    { sourceType: "onepiece", variationCode: "N", rarity: "R", cardNumber: "EB05-001" },
+    { sourceType: "onepiece", variationCode: "ND", rarity: "R", cardNumber: "EB05-001" },
+    { sourceType: "onepiece", variationCode: "N", rarity: "SR", cardNumber: "EB05-010" },
+    { sourceType: "onepiece", variationCode: "N", rarity: "SR", cardNumber: "EB05-002" },
+    { sourceType: "onepiece", variationCode: "ND", rarity: "SR", cardNumber: "EB05-010" },
+  ].sort(compareProductsForExport);
+  assert.deepEqual(
+    cards.map((card) => `${card.cardNumber}:${card.variationCode}`),
+    [
+      "EB05-002:N",
+      "EB05-002:ND",
+      "EB05-010:N",
+      "EB05-010:ND",
+      "EB05-001:N",
+      "EB05-001:ND",
+    ],
+  );
 });
 
 test("ハリー・ポッター出力は★★、★、通常の各レアリティ・カード番号順になる", () => {
