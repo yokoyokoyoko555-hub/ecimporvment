@@ -19,6 +19,7 @@ const schema = z.object({
   departmentId: z.string().trim().max(40),
   category: z.string().trim().max(200),
   subcategory: z.string().trim().max(200),
+  groupName: z.string().trim().max(200),
   exportEnabled: z.boolean(),
 });
 
@@ -43,7 +44,7 @@ export async function PATCH(
   const value = parsed.data;
   try {
     const result = await pool.query(
-      `UPDATE products SET product_name=$1,product_code=$2,sale_price=$3,cost_price=$4,initial_stock=$5,department_id=$6,category=$7,subcategory=$8,export_enabled=$9,updated_at=now() WHERE id=$10 RETURNING id`,
+      `UPDATE products SET product_name=$1,product_code=$2,sale_price=$3,cost_price=$4,initial_stock=$5,department_id=$6,category=$7,subcategory=$8,group_name=$9,export_enabled=$10,updated_at=now() WHERE id=$11 RETURNING id`,
       [
         value.productName,
         value.productCode,
@@ -53,6 +54,7 @@ export async function PATCH(
         value.departmentId || null,
         value.category || null,
         value.subcategory || null,
+        value.groupName || null,
         value.exportEnabled,
         id,
       ],

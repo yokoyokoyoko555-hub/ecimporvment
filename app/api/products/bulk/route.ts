@@ -15,6 +15,7 @@ const item = z.object({
   departmentId: z.string(),
   category: z.string(),
   subcategory: z.string(),
+  groupName: z.string(),
   exportEnabled: z.boolean(),
   createDamaged: z.boolean().default(false),
 });
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
     let createdDamaged = 0;
     for (const product of parsed.data.products) {
       await client.query(
-        `UPDATE products SET product_name=$1,product_code=$2,sale_price=$3,cost_price=$4,initial_stock=$5,department_id=$6,category=$7,subcategory=$8,export_enabled=$9,updated_at=now() WHERE id=$10`,
+        `UPDATE products SET product_name=$1,product_code=$2,sale_price=$3,cost_price=$4,initial_stock=$5,department_id=$6,category=$7,subcategory=$8,group_name=$9,export_enabled=$10,updated_at=now() WHERE id=$11`,
         [
           product.productName,
           product.productCode,
@@ -60,6 +61,7 @@ export async function POST(request: Request) {
           product.departmentId || null,
           product.category || null,
           product.subcategory || null,
+          product.groupName || null,
           product.exportEnabled,
           product.id,
         ],
@@ -145,8 +147,8 @@ export async function POST(request: Request) {
           ? product.productName
           : `【傷あり特価】[状態A-] ${product.productName}`;
         await client.query(
-          `INSERT INTO products(card_id,product_code,product_name,sale_price,cost_price,initial_stock,department_id,category,subcategory,image_file_name,export_enabled)
-          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6,$7,true)`,
+          `INSERT INTO products(card_id,product_code,product_name,sale_price,cost_price,initial_stock,department_id,category,subcategory,group_name,image_file_name,export_enabled)
+          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6,$7,$8,true)`,
           [
             damagedCard.rows[0].id,
             damagedCode,
@@ -154,6 +156,7 @@ export async function POST(request: Request) {
             product.departmentId || null,
             product.category || null,
             product.subcategory || null,
+            product.groupName || null,
             extension ? `${damagedCode}${extension}` : null,
           ],
         );

@@ -24,6 +24,7 @@ export interface EditableProduct {
   departmentId: string;
   category: string;
   subcategory: string;
+  groupName: string;
   exportEnabled: boolean;
   isDamaged: boolean;
   createDamaged: boolean;
@@ -52,6 +53,7 @@ export function ProductEditor({
     departmentId: "",
     category: "",
     subcategory: "",
+    groupName: "",
   });
   const availableRarities = Array.from(
     new Set(products.map((product) => product.rarity || "")),
@@ -107,7 +109,7 @@ export function ProductEditor({
   }
 
   function applyBulk(
-    field: "salePrice" | "initialStock" | "departmentId" | "category" | "subcategory",
+    field: "salePrice" | "initialStock" | "departmentId" | "category" | "subcategory" | "groupName",
     clear = false,
   ) {
     const value = clear ? "" : bulkValues[field];
@@ -120,7 +122,8 @@ export function ProductEditor({
               [field]:
                 field === "departmentId" ||
                 field === "category" ||
-                field === "subcategory"
+                field === "subcategory" ||
+                field === "groupName"
                   ? value
                   : value === ""
                     ? null
@@ -276,6 +279,11 @@ export function ProductEditor({
             <input value={bulkValues.subcategory} onChange={(event) => setBulkValues((current) => ({ ...current, subcategory: event.target.value }))} />
             <span className="bulkButtons"><button type="button" onClick={() => applyBulk("subcategory")}>反映</button><button type="button" onClick={() => applyBulk("subcategory", true)}>空欄にする</button></span>
           </label>
+          <label>
+            グループ
+            <input value={bulkValues.groupName} onChange={(event) => setBulkValues((current) => ({ ...current, groupName: event.target.value }))} />
+            <span className="bulkButtons"><button type="button" onClick={() => applyBulk("groupName")}>反映</button><button type="button" onClick={() => applyBulk("groupName", true)}>空欄にする</button></span>
+          </label>
         </div>
         <label className="bulkDamaged">
           <input
@@ -399,6 +407,15 @@ export function ProductEditor({
                   value={product.subcategory}
                   onChange={(event) =>
                     update(product.sourceKey, "subcategory", event.target.value)
+                  }
+                />
+              </div>
+              <div className="field">
+                <label>おちゃのこグループ</label>
+                <input
+                  value={product.groupName}
+                  onChange={(event) =>
+                    update(product.sourceKey, "groupName", event.target.value)
                   }
                 />
               </div>

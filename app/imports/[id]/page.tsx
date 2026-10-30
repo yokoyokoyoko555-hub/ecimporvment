@@ -28,6 +28,7 @@ type ProductRow = {
   department_id: string | null;
   category: string | null;
   subcategory: string | null;
+  group_name: string | null;
   export_enabled: boolean | null;
 };
 
@@ -50,7 +51,7 @@ export default async function Page({
   );
   if (!batchResult.rows[0]) notFound();
   const result = await pool.query<ProductRow>(
-    `SELECT p.id,c.source_key,c.variation_code,c.card_number,c.card_name,c.rarity,c.colors,c.is_parallel,c.source_image_url,p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.export_enabled
+    `SELECT p.id,c.source_key,c.variation_code,c.card_number,c.card_name,c.rarity,c.colors,c.is_parallel,c.source_image_url,p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.export_enabled
     FROM cards c LEFT JOIN LATERAL(SELECT px.* FROM products px JOIN cards pc ON pc.id=px.card_id WHERE pc.card_number=c.card_number AND pc.variation_code=c.variation_code LIMIT 1)p ON true
     WHERE c.import_batch_id=$1 ORDER BY c.card_number,c.variation_code`,
     [id],
@@ -82,6 +83,7 @@ export default async function Page({
       batch.source_type === "onepiece"
         ? row.subcategory || ""
         : row.subcategory || defaultSubcategory,
+    groupName: row.group_name || "",
     exportEnabled: row.export_enabled ?? true,
     isDamaged: row.product_code?.endsWith("dmg") ?? false,
     createDamaged: false,
