@@ -5,6 +5,12 @@ import {
   compareByRarityAndCardNumber,
   rarityRank,
 } from "@/lib/product-sort";
+import {
+  OCHANOKO_GROUP_OPTIONS,
+  parseOchanokoGroups,
+  serializeOchanokoGroups,
+  toggleOchanokoGroup,
+} from "@/lib/ochanoko-groups";
 
 export interface EditableProduct {
   id: string | null;
@@ -53,8 +59,8 @@ export function ProductEditor({
     departmentId: "",
     category: "",
     subcategory: "",
-    groupName: "",
   });
+  const [bulkGroups, setBulkGroups] = useState<string[]>([]);
   const availableRarities = Array.from(
     new Set(products.map((product) => product.rarity || "")),
   ).sort(
@@ -109,7 +115,7 @@ export function ProductEditor({
   }
 
   function applyBulk(
-    field: "salePrice" | "initialStock" | "departmentId" | "category" | "subcategory" | "groupName",
+    field: "salePrice" | "initialStock" | "departmentId" | "category" | "subcategory",
     clear = false,
   ) {
     const value = clear ? "" : bulkValues[field];
@@ -122,8 +128,7 @@ export function ProductEditor({
               [field]:
                 field === "departmentId" ||
                 field === "category" ||
-                field === "subcategory" ||
-                field === "groupName"
+                field === "subcategory"
                   ? value
                   : value === ""
                     ? null
@@ -134,6 +139,21 @@ export function ProductEditor({
     );
     setMessage(
       `表示中の${shownKeys.size}件へ${clear ? "空欄" : "入力値"}を反映しました。「すべて保存」で確定してください。`,
+    );
+  }
+
+  function applyBulkGroups(clear = false) {
+    const shownKeys = new Set(shown.map((product) => product.sourceKey));
+    const value = clear ? "" : serializeOchanokoGroups(bulkGroups);
+    setProducts((current) =>
+      current.map((product) =>
+        shownKeys.has(product.sourceKey)
+          ? { ...product, groupName: value }
+          : product,
+      ),
+    );
+    setMessage(
+      `表示中の${shownKeys.size}件へ${clear ? "グループの空欄" : `${bulkGroups.length}グループ`}を反映しました。「すべて保存」で確定してください。`,
     );
   }
 
@@ -279,11 +299,28 @@ export function ProductEditor({
             <input value={bulkValues.subcategory} onChange={(event) => setBulkValues((current) => ({ ...current, subcategory: event.target.value }))} />
             <span className="bulkButtons"><button type="button" onClick={() => applyBulk("subcategory")}>反映</button><button type="button" onClick={() => applyBulk("subcategory", true)}>空欄にする</button></span>
           </label>
-          <label>
-            グループ
-            <input value={bulkValues.groupName} onChange={(event) => setBulkValues((current) => ({ ...current, groupName: event.target.value }))} />
-            <span className="bulkButtons"><button type="button" onClick={() => applyBulk("groupName")}>反映</button><button type="button" onClick={() => applyBulk("groupName", true)}>空欄にする</button></span>
-          </label>
+          <div className="bulkGroupField">
+            <b>グループ（複数選択可）</b>
+            <div className="groupOptions">
+              {OCHANOKO_GROUP_OPTIONS.map((group) => (
+                <label key={group}>
+                  <input
+                    type="checkbox"
+                    checked={bulkGroups.includes(group)}
+                    onChange={(event) =>
+                      setBulkGroups((current) =>
+                        event.target.checked
+                          ? [...current, group]
+                          : current.filter((value) => value !== group),
+                      )
+                    }
+                  />
+                  {group}
+                </label>
+              ))}
+            </div>
+            <span className="bulkButtons"><button type="button" onClick={() => applyBulkGroups()}>選択したグループを反映</button><button type="button" onClick={() => applyBulkGroups(true)}>空欄にする</button></span>
+          </div>
         </div>
         <label className="bulkDamaged">
           <input
@@ -412,12 +449,45 @@ export function ProductEditor({
               </div>
               <div className="field">
                 <label>おちゃのこグループ</label>
-                <input
-                  value={product.groupName}
-                  onChange={(event) =>
-                    update(product.sourceKey, "groupName", event.target.value)
-                  }
-                />
+                <details className="groupSelector">
+                  <summary>
+                    {parseOchanokoGroups(product.groupName).length
+                      ? parseOchanokoGroups(product.groupName).join("、")
+                      : "未設定"}
+                  </summary>
+                  <div className="groupOptions">
+                    {OCHANOKO_GROUP_OPTIONS.map((group) => (
+                      <label key={group}>
+                        <input
+                          type="checkbox"
+                          checked={parseOchanokoGroups(product.groupName).includes(group)}
+                          onChange={(event) =>
+                            update(
+                              product.sourceKey,
+                              "groupName",
+                              toggleOchanokoGroup(
+                                product.groupName,
+                                group,
+                                event.target.checked,
+                              ),
+                            )
+                          }
+                        />
+                        {group}
+                      </label>
+                    ))}
+                    {parseOchanokoGroups(product.groupName)
+                      .filter(
+                        (group) =>
+                          !(OCHANOKO_GROUP_OPTIONS as readonly string[]).includes(group),
+                      )
+                      .map((group) => (
+                        <span className="unknownGroup" key={group}>
+                          既存グループ：{group}
+                        </span>
+                      ))}
+                  </div>
+                </details>
               </div>
               <div className="productActions">
                 <label>

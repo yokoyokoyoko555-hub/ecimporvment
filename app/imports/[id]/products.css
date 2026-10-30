@@ -84,6 +84,7 @@
   border-radius: 7px;
 }
 .bulkButtons{display:flex;gap:5px;margin-top:6px}.bulkButtons button{flex:1;border:1px solid var(--line);border-radius:7px;background:#fff;padding:7px 5px;font-weight:700;cursor:pointer}.bulkButtons button:last-child{color:#8b5013;background:#fff8ef}.bulkButtons button:hover{border-color:var(--green)}
+.bulkGroupField{grid-column:1/-1;font-size:12px}.groupSelector{border:1px solid var(--line);border-radius:8px;background:#fff}.groupSelector summary{padding:10px 12px;cursor:pointer;font-weight:700}.groupOptions{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:7px;padding:10px 12px}.groupOptions label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}.groupOptions input{width:auto;margin:0}.unknownGroup{grid-column:1/-1;color:var(--muted);font-size:12px}.bulkGroupField>.groupOptions{margin-top:5px;border:1px solid var(--line);border-radius:8px;background:#f8faf9}
 .bulkPanel p {
   font-size: 12px;
   color: var(--muted);
@@ -179,6 +180,7 @@
   .bulkGrid {
     grid-template-columns: 1fr 1fr;
   }
+  .groupOptions{grid-template-columns:repeat(2,minmax(130px,1fr))}
 }
 @media (max-width: 600px) {
   .productCard {
@@ -193,6 +195,7 @@
   .smallFields {
     grid-template-columns: 1fr;
   }
+  .groupOptions{grid-template-columns:1fr}
   .editorToolbar {
     flex-direction: column;
   }
