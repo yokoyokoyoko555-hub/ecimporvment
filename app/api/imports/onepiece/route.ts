@@ -8,6 +8,7 @@ import {
 } from "@/lib/product-name";
 import { resolveProductCode } from "@/lib/product-code";
 import { ochanokoCategoryName, ochanokoSubcategoryName } from "@/lib/catalog-category";
+import { onePieceDefaultSalePrice } from "@/lib/onepiece-price";
 
 const schema = z
   .object({
@@ -127,7 +128,7 @@ export async function POST(request: Request) {
           isParallel: card.isParallel,
         });
         await client.query(
-          `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory,sale_price,initial_stock) VALUES($1,$2,$3,$4,$5,$6,0,0)`,
+          `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory,sale_price,initial_stock) VALUES($1,$2,$3,$4,$5,$6,$7,0)`,
           [
             inserted.rows[0].id,
             productCode,
@@ -135,6 +136,7 @@ export async function POST(request: Request) {
             card.imageUrl ? `${productCode}.png` : null,
             category,
             subcategory,
+            onePieceDefaultSalePrice(card.rarity) ?? 0,
           ],
         );
       }

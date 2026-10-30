@@ -3,6 +3,7 @@ import { z } from "zod";
 import { pool } from "@/lib/db";
 import { renderProductName } from "@/lib/product-name";
 import { resolveProductCode } from "@/lib/product-code";
+import { onePieceDefaultSalePrice } from "@/lib/onepiece-price";
 
 const cardSchema = z.object({
   cardName: z.string().trim().min(1, "カード名を入力してください").max(200),
@@ -126,6 +127,11 @@ export async function POST(request: Request) {
           isParallel: card.isParallel,
         },
       );
+      const salePrice =
+        card.salePrice ??
+        (parsed.data.titleKey === "onepiece"
+          ? onePieceDefaultSalePrice(card.rarity)
+          : null);
       await client.query(
         `INSERT INTO products(
         card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, subcategory, image_file_name)
@@ -134,7 +140,7 @@ export async function POST(request: Request) {
           cardResult.rows[0].id,
           productCode,
           card.productName || generatedName,
-          card.salePrice ?? null,
+          salePrice,
           card.costPrice ?? null,
           card.initialStock,
           card.departmentId || null,
@@ -177,11 +183,12 @@ export async function POST(request: Request) {
         await client.query(
           `INSERT INTO products(
           card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, subcategory, group_name, image_file_name)
-          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6,'★SALE★',$7)`,
+          VALUES($1,$2,$3,$4,NULL,NULL,$5,$6,$7,'★SALE★',$8)`,
           [
             damagedCard.rows[0].id,
             damagedCode,
             `【傷あり特価】[状態A-] ${card.productName || generatedName}`,
+            salePrice,
             card.departmentId || null,
             category,
             subcategory,

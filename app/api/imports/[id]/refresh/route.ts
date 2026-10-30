@@ -7,6 +7,7 @@ import {
   renderProductName,
 } from "@/lib/product-name";
 import { resolveProductCode } from "@/lib/product-code";
+import { onePieceDefaultSalePrice } from "@/lib/onepiece-price";
 import {
   ochanokoCategoryName,
   ochanokoSubcategoryName,
@@ -182,7 +183,7 @@ export async function POST(
         });
         await client.query(
           `INSERT INTO products(card_id,product_code,product_name,image_file_name,category,subcategory,sale_price,initial_stock)
-           VALUES($1,$2,$3,$4,$5,$6,0,0)`,
+           VALUES($1,$2,$3,$4,$5,$6,$7,0)`,
           [
             inserted.rows[0].id,
             productCode,
@@ -190,6 +191,7 @@ export async function POST(
             card.imageUrl ? `${productCode}.png` : null,
             ochanokoCategoryName("onepiece", "ワンピースカード"),
             ochanokoSubcategoryName(batch.set_name),
+            onePieceDefaultSalePrice(card.rarity) ?? 0,
           ],
         );
         added += 1;
