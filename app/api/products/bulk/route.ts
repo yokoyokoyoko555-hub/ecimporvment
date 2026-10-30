@@ -141,9 +141,6 @@ export async function POST(request: Request) {
             }),
           ],
         );
-        const extension =
-          card.image_file_name?.match(/(\.[A-Za-z0-9]+)$/)?.[1] ||
-          (card.source_image_url ? ".jpg" : "");
         const damagedName = product.productName.startsWith("【傷あり特価】")
           ? product.productName
           : `【傷あり特価】[状態A-] ${product.productName}`;
@@ -158,7 +155,7 @@ export async function POST(request: Request) {
             product.category || null,
             product.subcategory || null,
             withDefaultDamagedSaleGroup(product.groupName),
-            extension ? `${damagedCode}${extension}` : null,
+            card.image_file_name,
           ],
         );
         createdDamaged += 1;

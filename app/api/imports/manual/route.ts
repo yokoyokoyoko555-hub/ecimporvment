@@ -185,7 +185,7 @@ export async function POST(request: Request) {
             card.departmentId || null,
             category,
             subcategory,
-            card.imageUrl ? `${damagedCode}.jpg` : null,
+            card.imageUrl ? `${productCode}.jpg` : null,
           ],
         );
       }
