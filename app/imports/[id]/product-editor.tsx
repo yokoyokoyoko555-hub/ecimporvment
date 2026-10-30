@@ -5,6 +5,7 @@ import {
   compareByRarityAndCardNumber,
   rarityRank,
 } from "@/lib/product-sort";
+import { matchesProductDisplayFilter } from "@/lib/product-filter";
 import {
   OCHANOKO_GROUP_OPTIONS,
   parseOchanokoGroups,
@@ -71,7 +72,7 @@ export function ProductEditor({
   const shown = products
     .filter(
       (product) =>
-        (rarityFilter === "all" || (product.rarity || "") === rarityFilter) &&
+        matchesProductDisplayFilter(product, rarityFilter) &&
         `${product.cardNumber} ${product.cardName} ${product.productName}`
           .toLowerCase()
           .includes(filter.toLowerCase()),
@@ -223,7 +224,7 @@ export function ProductEditor({
         </select>
         <select
           className="rarityFilterSelect"
-          aria-label="表示するレアリティ"
+          aria-label="表示するカード"
           value={rarityFilter}
           onChange={(event) => setRarityFilter(event.target.value)}
         >
@@ -233,6 +234,7 @@ export function ProductEditor({
               {rarity || "レアリティなし"}だけ表示
             </option>
           ))}
+          <option value="damaged">傷ありだけ表示</option>
         </select>
         <span className={invalid ? "validationBad" : "validationGood"}>
           {invalid
