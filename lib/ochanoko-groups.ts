@@ -34,6 +34,12 @@ export function serializeOchanokoGroups(groups: string[]) {
   );
 }
 
+export function withDefaultDamagedSaleGroup(
+  current: string | null | undefined,
+) {
+  return serializeOchanokoGroups([...parseOchanokoGroups(current), "★SALE★"]);
+}
+
 export function toggleOchanokoGroup(
   current: string | null | undefined,
   group: string,

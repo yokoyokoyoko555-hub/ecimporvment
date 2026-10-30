@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { pool } from "@/lib/db";
+import { withDefaultDamagedSaleGroup } from "@/lib/ochanoko-groups";
 
 const item = z.object({
   id: z.string().uuid(),
@@ -156,7 +157,7 @@ export async function POST(request: Request) {
             product.departmentId || null,
             product.category || null,
             product.subcategory || null,
-            product.groupName || null,
+            withDefaultDamagedSaleGroup(product.groupName),
             extension ? `${damagedCode}${extension}` : null,
           ],
         );

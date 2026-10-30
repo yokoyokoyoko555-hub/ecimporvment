@@ -176,8 +176,8 @@ export async function POST(request: Request) {
         );
         await client.query(
           `INSERT INTO products(
-          card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, subcategory, image_file_name)
-          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6,$7)`,
+          card_id, product_code, product_name, sale_price, cost_price, initial_stock, department_id, category, subcategory, group_name, image_file_name)
+          VALUES($1,$2,$3,NULL,NULL,NULL,$4,$5,$6,'★SALE★',$7)`,
           [
             damagedCard.rows[0].id,
             damagedCode,

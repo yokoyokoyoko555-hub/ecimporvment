@@ -4,6 +4,7 @@ import {
   parseOchanokoGroups,
   serializeOchanokoGroups,
   toggleOchanokoGroup,
+  withDefaultDamagedSaleGroup,
 } from "../lib/ochanoko-groups";
 
 test("複数のおちゃのこグループをセル内改行で保存する", () => {
@@ -20,5 +21,16 @@ test("グループ選択時も既存の未知グループを保持する", () =>
   assert.equal(
     toggleOchanokoGroup("鑑定にオススメ！\nSP", "SP", false),
     "鑑定にオススメ！",
+  );
+});
+
+test("傷あり商品には既存グループを残してSALEグループを一度だけ追加する", () => {
+  assert.equal(
+    withDefaultDamagedSaleGroup("リーダーパラレル"),
+    "リーダーパラレル\n★SALE★",
+  );
+  assert.equal(
+    withDefaultDamagedSaleGroup("★SALE★\nリーダーパラレル"),
+    "★SALE★\nリーダーパラレル",
   );
 });
