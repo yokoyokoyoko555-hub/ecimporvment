@@ -5,6 +5,7 @@ import { ProductEditor, type EditableProduct } from "./product-editor";
 import "./products.css";
 import "./damage.css";
 import { ochanokoCategoryName, ochanokoSubcategoryName } from "@/lib/catalog-category";
+import { productImagePreviewUrl } from "@/lib/image-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +66,10 @@ export default async function Page({
     rarity: row.rarity,
     colors: row.colors,
     isParallel: row.is_parallel,
-    imageUrl: row.source_image_url,
+    imageUrl: productImagePreviewUrl(
+      batch.source_type,
+      row.source_image_url,
+    ),
     productCode: row.product_code || "",
     productName: row.product_name || row.card_name,
     salePrice: row.sale_price,
