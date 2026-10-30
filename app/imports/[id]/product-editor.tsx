@@ -353,7 +353,13 @@ export function ProductEditor({
               <div className="cardMeta">
                 <b>{product.cardNumber}</b>
                 <span>{product.rarity}</span>
-                {product.isParallel && <span>パラレル</span>}
+                {product.isParallel &&
+                  ![
+                    "SP",
+                    "パラレル",
+                    "リーダーパラレル",
+                    "スーパーパラレル",
+                  ].includes(product.rarity || "") && <span>パラレル</span>}
                 {product.isDamaged && (
                   <span className="damagedBadge">状態A-</span>
                 )}

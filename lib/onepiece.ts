@@ -6,6 +6,8 @@ const clean = (value: string | undefined) => value?.replace(/\s+/g, " ").trim() 
 const integer = (value: string | null) => value && /^\d+$/.test(value) ? Number(value) : null;
 
 function displayedRarity(rawRarity: string | null, variationCode: string, variants: number) {
+  const officialRarity = (rawRarity || "").replace(/\s+/g, "");
+  if (officialRarity === "SPカード" || officialRarity === "SP") return "SP";
   if (variationCode === "N") return rawRarity;
   if (rawRarity === "L") return "リーダーパラレル";
   const number = Number(variationCode.replace(/^P/i, "")) || 1;

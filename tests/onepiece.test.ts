@@ -90,3 +90,16 @@ test("リーダーの別イラストはリーダーパラレルとして扱う",
   const cards = parseOnePieceCards(html, "https://www.onepiece-cardgame.com/cardlist/?series=550117");
   assert.equal(cards[1].rarity, "リーダーパラレル");
 });
+
+test("公式のSPカード表記を画像番号による推定より優先する", () => {
+  const html = card("OP17-022_p3", "/images/p3.png").replace(
+    "<span>SR</span>",
+    "<span>SPカード</span>",
+  );
+  const cards = parseOnePieceCards(
+    html,
+    "https://www.onepiece-cardgame.com/cardlist/?series=550205",
+  );
+  assert.equal(cards[0].variationCode, "P3");
+  assert.equal(cards[0].rarity, "SP");
+});
