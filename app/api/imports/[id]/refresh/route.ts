@@ -114,6 +114,29 @@ export async function POST(
               card.sourceKey,
             ],
           );
+          await client.query(
+            `UPDATE cards SET rarity=$1,card_type=$2,level=$3,is_parallel=$4,card_name=$5,colors=$6,play_cost=$7,dp=$8,form=$9,attribute=$10,traits=$11,upper_text=$12,lower_text=$13,source_image_url=$14,raw_data=$15
+             WHERE import_batch_id=$16 AND source_key=$17`,
+            [
+              card.rarity,
+              card.cardType,
+              card.level,
+              card.isParallel,
+              card.cardName,
+              card.colors,
+              card.playCost,
+              card.dp,
+              card.form,
+              card.attribute,
+              card.traits,
+              card.upperText,
+              card.lowerText,
+              card.imageUrl,
+              rawData,
+              batch.id,
+              `${card.sourceKey}-dmg`,
+            ],
+          );
           updated += 1;
           continue;
         }
