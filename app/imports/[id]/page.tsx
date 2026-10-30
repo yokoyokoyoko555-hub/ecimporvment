@@ -6,6 +6,7 @@ import "./products.css";
 import "./damage.css";
 import { ochanokoCategoryName, ochanokoSubcategoryName } from "@/lib/catalog-category";
 import { productImagePreviewUrl } from "@/lib/image-preview";
+import { RefreshImportButton } from "./refresh-import-button";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +97,9 @@ export default async function Page({
           </p>
         </div>
         <div className="headerActions">
+          {batch.source_type === "onepiece" && (
+            <RefreshImportButton batchId={id} />
+          )}
           <Link className="button secondary" href="/imports">
             取込一覧へ
           </Link>

@@ -15,7 +15,9 @@
 .headerActions {
   display: flex;
   gap: 10px;
+  align-items: flex-start;
 }
+.refreshImport{display:grid;gap:5px}.refreshImport span{max-width:260px;font-size:12px;color:var(--muted)}
 .editorToolbar {
   display: flex;
   justify-content: space-between;
