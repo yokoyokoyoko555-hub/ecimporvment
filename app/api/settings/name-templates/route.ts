@@ -89,7 +89,7 @@ export async function DELETE(request: Request) {
       { status: 400 },
     );
   if (
-    ["onepiece", "digimon", "lorcana", "xross-stars", "harrypotter"].includes(
+    ["onepiece", "digimon", "lorcana", "xross-stars", "harrypotter", "haikyu"].includes(
       parsed.data.titleKey,
     )
   )

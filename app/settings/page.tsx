@@ -81,6 +81,7 @@ export default async function SettingsPage() {
         | "lorcana"
         | "xross-stars"
         | "harrypotter"
+        | "haikyu"
         | null;
       default_url: string | null;
       active: boolean | null;

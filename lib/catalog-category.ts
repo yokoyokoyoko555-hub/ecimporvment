@@ -4,6 +4,7 @@ const OCHANOKO_TITLE_NAMES: Record<string, string> = {
   lorcana: "ディズニー・ロルカナ",
   "xross-stars": "Xross Stars",
   harrypotter: "ハリー・ポッター カードゲーム",
+  haikyu: "ハイキュー!!バボカ!!BREAK",
 };
 
 export function ochanokoCategoryName(titleKey: string, displayName: string) {

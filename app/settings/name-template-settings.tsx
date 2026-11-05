@@ -190,6 +190,7 @@ export function NameTemplateSettings({
                   "lorcana",
                   "xross-stars",
                   "harrypotter",
+                  "haikyu",
                 ].includes(
                   item.titleKey,
                 ) && (

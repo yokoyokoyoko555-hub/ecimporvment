@@ -55,3 +55,18 @@ test("ワンピースのWebP画像を実データもPNGへ変換する", async (
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
   ]);
 });
+
+test("ハイキューのWebP画像を実データもPNGへ変換する", async () => {
+  const input = await sharp({
+    create: {
+      width: 32,
+      height: 48,
+      channels: 4,
+      background: { r: 245, g: 120, b: 20, alpha: 1 },
+    },
+  })
+    .webp()
+    .toBuffer();
+  const output = await prepareImageForExport("haikyu", input);
+  assert.equal((await sharp(output).metadata()).format, "png");
+});

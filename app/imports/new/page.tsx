@@ -16,7 +16,8 @@ export default async function NewImportPage() {
         | "onepiece"
         | "lorcana"
         | "xross-stars"
-        | "harrypotter";
+        | "harrypotter"
+        | "haikyu";
       default_url: string;
     }>(`SELECT s.title_key,t.display_name,s.source_name,s.scraper_key,s.default_url
       FROM catalog_sources s JOIN product_name_templates t ON t.title_key=s.title_key

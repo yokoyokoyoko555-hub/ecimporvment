@@ -14,6 +14,7 @@ const schema = z
         "lorcana",
         "xross-stars",
         "harrypotter",
+        "haikyu",
       ])
       .nullable(),
     defaultUrl: z.union([z.string().url(), z.literal("")]).nullable(),

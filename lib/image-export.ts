@@ -9,7 +9,7 @@ export async function prepareImageForExport(
   // ONE PIECEの取得元にはWebP画像を配信するサイトがある一方、
   // おちゃのこCSVと画像ZIPでは.pngのファイル名を使用する。
   // 拡張子だけの変更にならないよう、画像本体も必ずPNGへ統一する。
-  if (sourceType === "onepiece")
+  if (sourceType === "onepiece" || sourceType === "haikyu")
     return sharp(input)
       .png({ compressionLevel: 9, effort: 10 })
       .toBuffer();

@@ -13,7 +13,8 @@ export type ImportSource = {
     | "onepiece"
     | "lorcana"
     | "xross-stars"
-    | "harrypotter";
+    | "harrypotter"
+    | "haikyu";
   defaultUrl: string;
 };
 
@@ -37,6 +38,11 @@ function defaultSet(source: ImportSource | undefined) {
     return {
       name: "ブースターパック／『ハリー・ポッターと賢者の石』 Part.2",
       code: "HP02",
+    };
+  if (source?.scraperKey === "haikyu")
+    return {
+      name: "ブースターパック 才能とセンス【HV-P04】",
+      code: "HV-P04",
     };
   return { name: "", code: "" };
 }
@@ -71,6 +77,8 @@ export function ImportForm({ sources }: { sources: ImportSource[] }) {
                 ? "/api/imports/xross-stars"
                 : selected?.scraperKey === "harrypotter"
                   ? "/api/imports/harrypotter"
+                  : selected?.scraperKey === "haikyu"
+                    ? "/api/imports/haikyu"
               : null;
       if (!endpoint) throw new Error("この取得元のスクレイパーは未対応です");
       const response = await fetch(endpoint, {

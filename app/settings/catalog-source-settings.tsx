@@ -12,6 +12,7 @@ export type CatalogSourceItem = {
     | "lorcana"
     | "xross-stars"
     | "harrypotter"
+    | "haikyu"
     | null;
   defaultUrl: string;
   active: boolean;
@@ -140,6 +141,9 @@ export function CatalogSourceSettings({
                         </option>
                         <option value="harrypotter">
                           ハリー・ポッター カードゲーム公式（対応済み）
+                        </option>
+                        <option value="haikyu">
+                          ハイキュー!!バボカ!!BREAK公式（対応済み）
                         </option>
                       </select>
                     </div>
