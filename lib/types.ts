@@ -8,4 +8,7 @@ export interface ImportBatch {
   status: BatchStatus;
   card_count: number;
   created_at: string;
+  source_type: string;
+  title_key: string;
+  title_name: string;
 }

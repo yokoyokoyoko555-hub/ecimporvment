@@ -1,0 +1,48 @@
+.importTitleTabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: -6px 0 18px;
+  padding: 6px 0 8px;
+  scrollbar-width: thin;
+}
+
+.importTitleTabs a {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.importTitleTabs a:hover {
+  border-color: var(--green);
+}
+
+.importTitleTabs a.active {
+  border-color: var(--green);
+  background: var(--green);
+  color: var(--white);
+}
+
+.importTitleTabs span {
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #edf3f0;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.importTitleTabs a.active span {
+  background: rgb(255 255 255 / 18%);
+  color: var(--white);
+}
