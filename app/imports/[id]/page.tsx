@@ -99,7 +99,7 @@ export default async function Page({
           </p>
         </div>
         <div className="headerActions">
-          {batch.source_type === "onepiece" && (
+          {["onepiece", "haikyu"].includes(batch.source_type) && (
             <RefreshImportButton batchId={id} />
           )}
           <Link className="button secondary" href="/imports">

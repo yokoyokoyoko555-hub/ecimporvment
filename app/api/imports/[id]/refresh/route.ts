@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { pool } from "@/lib/db";
 import { fetchOnePieceCards } from "@/lib/onepiece";
+import { fetchHaikyuCards } from "@/lib/haikyu";
 import {
   DEFAULT_PRODUCT_NAME_TEMPLATES,
   renderProductName,
@@ -48,14 +49,22 @@ export async function POST(
   const batch = batchResult.rows[0];
   if (!batch)
     return NextResponse.json({ error: "取込データが見つかりません" }, { status: 404 });
-  if (batch.source_type !== "onepiece")
+  if (!["onepiece", "haikyu"].includes(batch.source_type))
     return NextResponse.json(
-      { error: "現在、再取込はワンピースカードだけに対応しています" },
+      { error: "このタイトルは公式データ更新に対応していません" },
       { status: 422 },
     );
 
   try {
-    const cards = await fetchOnePieceCards(batch.source_url);
+    if (!batch.set_code)
+      return NextResponse.json(
+        { error: "セットコードが設定されていません" },
+        { status: 422 },
+      );
+    const cards =
+      batch.source_type === "haikyu"
+        ? await fetchHaikyuCards(batch.set_code)
+        : await fetchOnePieceCards(batch.source_url);
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
@@ -66,14 +75,19 @@ export async function POST(
         template_text: string;
         multiple_colors_label: string | null;
       }>(
-        "SELECT template_text,multiple_colors_label FROM product_name_templates WHERE title_key='onepiece'",
+        "SELECT template_text,multiple_colors_label FROM product_name_templates WHERE title_key=$1",
+        [batch.source_type],
       );
       const template = templateResult.rows[0]
         ? {
             templateText: templateResult.rows[0].template_text,
             multipleColorsLabel: templateResult.rows[0].multiple_colors_label,
           }
-        : DEFAULT_PRODUCT_NAME_TEMPLATES.onepiece;
+        : batch.source_type === "onepiece"
+          ? DEFAULT_PRODUCT_NAME_TEMPLATES.onepiece
+          : null;
+      if (!template)
+        throw new Error("商品名テンプレートが見つかりません");
       const existing = await client.query<{ source_key: string }>(
         "SELECT source_key FROM cards WHERE import_batch_id=$1",
         [batch.id],
@@ -86,7 +100,10 @@ export async function POST(
       for (const card of cards) {
         const rawData = JSON.stringify({
           ...card,
-          sourceProvider: sourceProvider(batch.source_url),
+          sourceProvider:
+            batch.source_type === "haikyu"
+              ? "ハイキュー!!バボカ!!BREAK公式"
+              : sourceProvider(batch.source_url),
           refreshedAt: new Date().toISOString(),
         });
         if (existingKeys.has(card.sourceKey)) {
@@ -167,12 +184,17 @@ export async function POST(
             rawData,
           ],
         );
-        const productCode = await resolveProductCode(
-          client,
-          "onepiece",
-          card.cardNumber,
-          null,
-        );
+        const productCode =
+          batch.source_type === "haikyu"
+            ? `HQ_${card.cardNumber}_${card.variationCode}`
+                .toUpperCase()
+                .replace(/[^A-Z0-9_-]/g, "")
+            : await resolveProductCode(
+                client,
+                "onepiece",
+                card.cardNumber,
+                null,
+              );
         const productName = renderProductName(template, {
           name: card.cardName,
           rarity: card.rarity,
@@ -189,9 +211,16 @@ export async function POST(
             productCode,
             productName,
             card.imageUrl ? `${productCode}.png` : null,
-            ochanokoCategoryName("onepiece", "ワンピースカード"),
+            ochanokoCategoryName(
+              batch.source_type,
+              batch.source_type === "haikyu"
+                ? "ハイキュー!!バボカ!!BREAK"
+                : "ワンピースカード",
+            ),
             ochanokoSubcategoryName(batch.set_name),
-            onePieceDefaultSalePrice(card.rarity) ?? 0,
+            batch.source_type === "onepiece"
+              ? onePieceDefaultSalePrice(card.rarity) ?? 0
+              : 0,
           ],
         );
         added += 1;
