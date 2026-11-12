@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
-import { LEGACY_DAMAGE_GROUP } from "@/lib/legacy-damaged-product";
+import {
+  LEGACY_DAMAGE_GROUP,
+  LEGACY_DAMAGE_PUBLICATION_STATUS,
+} from "@/lib/legacy-damaged-product";
 
 export async function POST() {
   if (!pool) return NextResponse.json({ error: "DB未接続" }, { status: 503 });
@@ -15,14 +18,14 @@ export async function POST() {
         CASE WHEN COALESCE(source.group_name,'')='' THEN $1
           WHEN $1=ANY(regexp_split_to_array(source.group_name,E'\\r?\\n')) THEN source.group_name
           ELSE source.group_name || E'\\n' || $1 END,
-        source.sale_price,0,'非表示',true,
+        source.sale_price,0,$2,true,
         source.raw_data || jsonb_build_object(
           '商品番号','','商品名','【傷あり特価】[状態A-] ' || source.product_name,
           '型番/品番',source.product_code || 'dmg','グループ',
           CASE WHEN COALESCE(source.group_name,'')='' THEN $1
             WHEN $1=ANY(regexp_split_to_array(source.group_name,E'\\r?\\n')) THEN source.group_name
             ELSE source.group_name || E'\\n' || $1 END,
-          '在庫数','0','公開状態','非表示'),
+          '在庫数','0','公開状態',$2::text),
         'generated_damage'
       FROM legacy_ochanoko_products source
       WHERE source.title_key='onepiece' AND source.is_damaged=false AND source.product_code IS NOT NULL
@@ -36,7 +39,7 @@ export async function POST() {
             AND lower(existing.product_code)=lower(source.product_code || 'dmg')
         )
       RETURNING product_code`,
-      [LEGACY_DAMAGE_GROUP],
+      [LEGACY_DAMAGE_GROUP, LEGACY_DAMAGE_PUBLICATION_STATUS],
     );
     if (result.rows.length) {
       await client.query(

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { pool } from "@/lib/db";
 import {
   isLegacyDamageCandidate,
+  LEGACY_DAMAGE_PUBLICATION_STATUS,
   withLegacyDamageGroup,
 } from "@/lib/legacy-damaged-product";
 
@@ -115,12 +116,12 @@ export async function POST(
     "型番/品番": productCode || "",
     グループ: groupName,
     在庫数: "0",
-    公開状態: "非表示",
+    公開状態: LEGACY_DAMAGE_PUBLICATION_STATUS,
   };
   const created = await pool.query<{ id: string }>(
     `INSERT INTO legacy_ochanoko_products(title_key,product_number,product_code,product_name,category,subcategory,
       group_name,sale_price,initial_stock,publication_status,is_damaged,raw_data,source_file)
-      VALUES('onepiece',NULL,$1,$2,$3,$4,$5,$6,0,'非表示',true,$7,'generated_damage') RETURNING id`,
+      VALUES('onepiece',NULL,$1,$2,$3,$4,$5,$6,0,$7,true,$8,'generated_damage') RETURNING id`,
     [
       productCode,
       productName,
@@ -128,6 +129,7 @@ export async function POST(
       product.subcategory,
       groupName,
       product.sale_price,
+      LEGACY_DAMAGE_PUBLICATION_STATUS,
       JSON.stringify(rawData),
     ],
   );

@@ -2,9 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   isLegacyDamageCandidate,
+  LEGACY_DAMAGE_PUBLICATION_STATUS,
   legacyProductRarity,
   withLegacyDamageGroup,
 } from "../lib/legacy-damaged-product";
+
+test("新規傷あり商品の公開状態は準備中にする", () => {
+  assert.equal(LEGACY_DAMAGE_PUBLICATION_STATUS, "準備中");
+});
 
 test("パラレルではないSEC・SR・Rを傷あり作成対象にする", () => {
   assert.equal(legacyProductRarity("ナミ 【SEC】【赤】【OP01-001】"), "SEC");

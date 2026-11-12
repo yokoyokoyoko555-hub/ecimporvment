@@ -44,7 +44,7 @@ export function ExistingProductRow({ initial }: { initial: ExistingProductItem }
   }
 
   async function damage() {
-    if (!confirm(`商品番号 ${item.productNumber || "未発番"} を元に、非表示の傷あり商品を複製しますか？`)) return;
+    if (!confirm(`商品番号 ${item.productNumber || "未発番"} を元に、準備中の傷あり商品を複製しますか？`)) return;
     setBusy(true);
     setMessage("傷ありへ変更中…");
     try {
@@ -56,7 +56,7 @@ export function ExistingProductRow({ initial }: { initial: ExistingProductItem }
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "変更に失敗しました");
       setItem((current) => ({ ...current, canCreateDamaged: false }));
-      setMessage(`非表示の傷あり商品「${result.productCode}」を複製しました`);
+      setMessage(`準備中の傷あり商品「${result.productCode}」を複製しました`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "変更に失敗しました");
     } finally {
@@ -82,7 +82,7 @@ export function ExistingProductRow({ initial }: { initial: ExistingProductItem }
       </div>
       <div className="existingProductActions">
         <button className="button" type="button" onClick={save} disabled={busy}>保存</button>
-        {item.canCreateDamaged && <button className="button damageButton" type="button" onClick={damage} disabled={busy}>非表示の傷あり商品を複製</button>}
+        {item.canCreateDamaged && <button className="button damageButton" type="button" onClick={damage} disabled={busy}>準備中の傷あり商品を複製</button>}
         <span>{message}</span>
       </div>
     </article>

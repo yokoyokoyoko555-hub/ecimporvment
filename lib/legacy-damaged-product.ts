@@ -1,6 +1,7 @@
 import { parseOchanokoGroups, serializeOchanokoGroups } from "./ochanoko-groups";
 
 export const LEGACY_DAMAGE_GROUP = "★SALE★SEC以下";
+export const LEGACY_DAMAGE_PUBLICATION_STATUS = "準備中";
 export const LEGACY_DAMAGE_RARITIES = ["SEC", "SR", "R"] as const;
 
 export function legacyProductRarity(productName: string) {
