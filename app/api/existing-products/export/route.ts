@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import iconv from "iconv-lite";
 import { pool } from "@/lib/db";
 import { csvLine, ochanokoHeaders } from "@/lib/csv";
+import { compareLegacyProductsForExport } from "@/lib/legacy-product-sort";
 
 type ExistingProduct = {
   product_number: string | null;
@@ -21,10 +22,10 @@ export async function GET() {
   const result = await pool.query<ExistingProduct>(
     `SELECT product_number,product_code,product_name,category,subcategory,group_name,sale_price,
       initial_stock,publication_status,raw_data FROM legacy_ochanoko_products
-      WHERE title_key='onepiece' ORDER BY product_number`,
+      WHERE title_key='onepiece'`,
   );
   const headers = ochanokoHeaders();
-  const rows = result.rows.map((product) => {
+  const rows = result.rows.sort(compareLegacyProductsForExport).map((product) => {
     const data = { ...product.raw_data };
     Object.assign(data, {
       商品番号: product.product_number,
