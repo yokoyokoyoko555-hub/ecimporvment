@@ -17,6 +17,7 @@ import { compareProductsForExport } from "@/lib/product-sort";
 import { prepareImageForExport } from "@/lib/image-export";
 
 interface ProductRow {
+  ochanoko_product_number: string | null;
   product_code: string;
   product_name: string;
   sale_price: number | null;
@@ -49,11 +50,17 @@ async function load(batchId: string) {
   if (!pool) throw new Error("データベースが接続されていません");
   return (
     await pool.query<ProductRow>(
-      `SELECT p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.variation_code,c.card_name,c.rarity,c.colors,c.traits,b.source_type,b.set_name,b.set_code,d.template_text description_template
+      `SELECT legacy.product_number ochanoko_product_number,p.product_code,p.product_name,p.sale_price,p.cost_price,p.initial_stock,p.department_id,p.category,p.subcategory,p.group_name,p.description_html,p.image_file_name,c.source_image_url,c.card_number,c.variation_code,c.card_name,c.rarity,c.colors,c.traits,b.source_type,b.set_name,b.set_code,d.template_text description_template
     FROM cards c
     JOIN products p ON p.card_id=c.id
     JOIN import_batches b ON b.id=c.import_batch_id
     LEFT JOIN product_description_templates d ON d.title_key=(CASE WHEN b.source_type LIKE 'manual:%' THEN substring(b.source_type from 8) ELSE b.source_type END)
+    LEFT JOIN LATERAL(
+      SELECT existing.product_number FROM legacy_ochanoko_products existing
+      WHERE existing.title_key=(CASE WHEN b.source_type LIKE 'manual:%' THEN substring(b.source_type from 8) ELSE b.source_type END)
+        AND lower(existing.product_code)=lower(p.product_code)
+      ORDER BY existing.updated_at DESC LIMIT 1
+    )legacy ON true
     WHERE c.import_batch_id=$1 AND p.export_enabled=true ORDER BY c.card_number,c.variation_code,p.created_at`,
       [batchId],
     )
@@ -160,6 +167,7 @@ export async function GET(request: Request) {
           const index = headers.indexOf(name);
           if (index >= 0) values[index] = value ?? "";
         };
+        set("商品番号", product.ochanoko_product_number);
         set("商品名", product.product_name);
         set("型番/品番", product.product_code);
         set("カテゴリ", product.category);

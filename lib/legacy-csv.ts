@@ -1,5 +1,19 @@
 export type LegacyCodeRecord = { productName: string; productCode: string };
 
+export type LegacyOchanokoProduct = {
+  productNumber: string;
+  productName: string;
+  productCode: string;
+  category: string;
+  subcategory: string;
+  groupName: string;
+  salePrice: number | null;
+  initialStock: number | null;
+  publicationStatus: string;
+  isDamaged: boolean;
+  rawData: Record<string, string>;
+};
+
 export function parseCsvRows(text: string) {
   const rows: string[][] = [];
   let row: string[] = [], cell = "", quoted = false;
@@ -32,6 +46,53 @@ export function extractLegacyCodes(text: string) {
     records.push({ productName: (row[nameIndex] || "").trim(), productCode });
   }
   return records;
+}
+
+const integerOrNull = (value: string | undefined) => {
+  const normalized = (value || "").replace(/,/g, "").trim();
+  if (!normalized || !/^-?\d+$/.test(normalized)) return null;
+  return Number(normalized);
+};
+
+export function extractLegacyOchanokoProducts(text: string) {
+  const rows = parseCsvRows(text);
+  const header = rows[0] || [];
+  const required = ["商品番号", "商品名", "型番/品番"];
+  if (required.some((name) => !header.includes(name))) {
+    throw new Error("おちゃのこ商品CSVではありません（商品番号・商品名・型番/品番列を確認してください）");
+  }
+  const index = (name: string) => header.indexOf(name);
+  const products: LegacyOchanokoProduct[] = [];
+  let skippedWithoutNumber = 0;
+  for (const row of rows.slice(1)) {
+    const productNumber = (row[index("商品番号")] || "").trim();
+    const productName = (row[index("商品名")] || "").trim();
+    if (!productNumber) {
+      if (productName) skippedWithoutNumber += 1;
+      continue;
+    }
+    if (!productName) continue;
+    const rawData = Object.fromEntries(
+      header.map((name, position) => [name, row[position] || ""]),
+    );
+    const productCode = (row[index("型番/品番")] || "").trim();
+    products.push({
+      productNumber,
+      productName,
+      productCode,
+      category: (row[index("カテゴリ")] || "").trim(),
+      subcategory: (row[index("サブカテゴリ")] || "").trim(),
+      groupName: (row[index("グループ")] || "").trim(),
+      salePrice: integerOrNull(row[index("販売価格")]),
+      initialStock: integerOrNull(row[index("在庫数")]),
+      publicationStatus: (row[index("公開状態")] || "").trim(),
+      isDamaged:
+        productName.startsWith("【傷あり特価】") ||
+        productCode.toLowerCase().endsWith("dmg"),
+      rawData,
+    });
+  }
+  return { products, skippedWithoutNumber };
 }
 
 export function collectOnePieceSequences(records: LegacyCodeRecord[]) {
