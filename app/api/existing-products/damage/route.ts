@@ -25,7 +25,9 @@ export async function POST() {
           CASE WHEN COALESCE(source.group_name,'')='' THEN $1
             WHEN $1=ANY(regexp_split_to_array(source.group_name,E'\\r?\\n')) THEN source.group_name
             ELSE source.group_name || E'\\n' || $1 END,
-          '在庫数','0','公開状態',$2::text),
+          '在庫数','0','公開状態',$2::text,
+          '説明',regexp_replace(COALESCE(source.raw_data->>'説明',''),
+            '(この商品の状態は\\s*<span[^>]*>)A(</span>)','\\1A-\\2')),
         'generated_damage'
       FROM legacy_ochanoko_products source
       WHERE source.title_key='onepiece' AND source.is_damaged=false AND source.product_code IS NOT NULL

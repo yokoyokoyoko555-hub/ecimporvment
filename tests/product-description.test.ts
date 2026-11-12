@@ -41,3 +41,23 @@ test("標準商品説明へ収録名・商品名・特徴を差し込む", () =>
     "ROMANCE DAWN OP-01<br />ロロノア・ゾロ 【リーダーパラレル】【赤】【OP01-001】<br />特徴:超新星/麦わらの一味",
   );
 });
+
+test("傷あり商品は商品説明の状態をA-にする", () => {
+  const result = renderProductDescription(
+    "この商品の状態は<span class='product-attention-text font-red'>A</span>になります。",
+    {
+      productName: "【傷あり特価】[状態A-] ナミ 【SR】【赤】【OP01-016】",
+      cardName: "ナミ",
+      rarity: "SR",
+      colors: ["赤"],
+      cardNumber: "OP01-016",
+      setName: "ROMANCE DAWN OP-01",
+      setCode: "OP-01",
+      traits: null,
+    },
+  );
+  assert.equal(
+    result,
+    "この商品の状態は<span class='product-attention-text font-red'>A-</span>になります。",
+  );
+});

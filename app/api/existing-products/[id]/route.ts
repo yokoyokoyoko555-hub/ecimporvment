@@ -6,6 +6,7 @@ import {
   LEGACY_DAMAGE_PUBLICATION_STATUS,
   withLegacyDamageGroup,
 } from "@/lib/legacy-damaged-product";
+import { applyProductConditionToDescription } from "@/lib/product-description";
 
 const updateSchema = z.object({
   productName: z.string().trim().min(1),
@@ -117,6 +118,10 @@ export async function POST(
     グループ: groupName,
     在庫数: "0",
     公開状態: LEGACY_DAMAGE_PUBLICATION_STATUS,
+    説明: applyProductConditionToDescription(
+      product.raw_data.説明 || "",
+      productName,
+    ),
   };
   const created = await pool.query<{ id: string }>(
     `INSERT INTO legacy_ochanoko_products(title_key,product_number,product_code,product_name,category,subcategory,

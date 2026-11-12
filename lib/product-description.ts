@@ -66,9 +66,21 @@ export function renderProductDescription(
     set_code: values.setCode || "",
     traits: values.traits || "",
   };
-  return templateText.replace(/\{\{([a-z_]+)\}\}/g, (match, field) =>
+  const rendered = templateText.replace(/\{\{([a-z_]+)\}\}/g, (match, field) =>
     field in replacements
       ? replacements[field as ProductDescriptionField]
       : match,
+  );
+  return applyProductConditionToDescription(rendered, values.productName);
+}
+
+export function applyProductConditionToDescription(
+  description: string,
+  productName: string,
+) {
+  if (!productName.startsWith("【傷あり特価】")) return description;
+  return description.replace(
+    /(この商品の状態は\s*<span\b[^>]*>)A(<\/span>)/,
+    "$1A-$2",
   );
 }
