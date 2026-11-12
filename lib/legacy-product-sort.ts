@@ -18,7 +18,7 @@ const damageSeries = [
 
 function damageCodeKey(productCode: string | null) {
   const code = (productCode || "").replace(/dmg$/i, "").toUpperCase();
-  const match = code.match(/^(OP|EB|PRB|ST)(\d{2})(\d{3})-(\d{2})$/);
+  const match = code.match(/^(OP|EB|PRB|ST)(\d{2})-?(\d{3})-(\d{2})$/);
   if (!match) return { series: damageSeries.length, set: 0, card: 0, branch: 0, code };
   const set = Number(match[2]);
   const series = damageSeries.findIndex(
