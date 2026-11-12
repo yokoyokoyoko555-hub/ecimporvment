@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { pool } from "@/lib/db";
-import { withDefaultDamagedSaleGroup } from "@/lib/ochanoko-groups";
+import {
+  isLegacyDamageCandidate,
+  withLegacyDamageGroup,
+} from "@/lib/legacy-damaged-product";
 
 const updateSchema = z.object({
   productName: z.string().trim().min(1),
@@ -68,14 +71,24 @@ export async function POST(
     product_code: string | null;
     group_name: string | null;
     is_damaged: boolean;
+    category: string | null;
+    subcategory: string | null;
+    sale_price: number | null;
+    raw_data: Record<string, string>;
   }>(
-    "SELECT product_name,product_code,group_name,is_damaged FROM legacy_ochanoko_products WHERE id=$1 AND title_key='onepiece'",
+    "SELECT product_name,product_code,group_name,is_damaged,category,subcategory,sale_price,raw_data FROM legacy_ochanoko_products WHERE id=$1 AND title_key='onepiece'",
     [id],
   );
   const product = current.rows[0];
   if (!product)
     return NextResponse.json({ error: "商品が見つかりません" }, { status: 404 });
-  if (product.is_damaged) return NextResponse.json({ ok: true });
+  if (product.is_damaged)
+    return NextResponse.json({ error: "すでに傷あり商品です" }, { status: 409 });
+  if (!isLegacyDamageCandidate(product.product_name, product.group_name, product.product_code))
+    return NextResponse.json(
+      { error: "傷あり商品の作成対象は、パラレルではないSEC・SR・Rです" },
+      { status: 422 },
+    );
   const productName = product.product_name.startsWith("【傷あり特価】")
     ? product.product_name
     : `【傷あり特価】[状態A-] ${product.product_name}`;
@@ -94,12 +107,29 @@ export async function POST(
         { status: 409 },
       );
   }
-  const groupName = withDefaultDamagedSaleGroup(product.group_name || "");
-  await pool.query(
-    `UPDATE legacy_ochanoko_products SET product_name=$1,product_code=$2,group_name=$3,is_damaged=true,
-      raw_data=raw_data || jsonb_build_object('商品名',$1::text,'型番/品番',COALESCE($2::text,''),'グループ',$3::text),updated_at=now()
-      WHERE id=$4`,
-    [productName, productCode, groupName, id],
+  const groupName = withLegacyDamageGroup(product.group_name || "");
+  const rawData = {
+    ...product.raw_data,
+    商品番号: "",
+    商品名: productName,
+    "型番/品番": productCode || "",
+    グループ: groupName,
+    在庫数: "0",
+    公開状態: "非表示",
+  };
+  const created = await pool.query<{ id: string }>(
+    `INSERT INTO legacy_ochanoko_products(title_key,product_number,product_code,product_name,category,subcategory,
+      group_name,sale_price,initial_stock,publication_status,is_damaged,raw_data,source_file)
+      VALUES('onepiece',NULL,$1,$2,$3,$4,$5,$6,0,'非表示',true,$7,'generated_damage') RETURNING id`,
+    [
+      productCode,
+      productName,
+      product.category,
+      product.subcategory,
+      groupName,
+      product.sale_price,
+      JSON.stringify(rawData),
+    ],
   );
   if (productCode) {
     await pool.query(
@@ -107,5 +137,5 @@ export async function POST(
       [productCode],
     );
   }
-  return NextResponse.json({ ok: true, productName, productCode, groupName });
+  return NextResponse.json({ ok: true, id: created.rows[0].id, productName, productCode, groupName });
 }

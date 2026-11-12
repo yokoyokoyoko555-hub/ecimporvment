@@ -4,7 +4,7 @@ import { pool } from "@/lib/db";
 import { csvLine, ochanokoHeaders } from "@/lib/csv";
 
 type ExistingProduct = {
-  product_number: string;
+  product_number: string | null;
   product_code: string | null;
   product_name: string;
   category: string | null;

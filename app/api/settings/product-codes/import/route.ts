@@ -55,6 +55,17 @@ export async function POST(request: Request) {
             catalogProducts.map((product) => [product.productNumber, product]),
           ).values(),
         ];
+        const importedCodes = latestProducts
+          .map((product) => product.productCode.toLowerCase())
+          .filter(Boolean);
+        if (importedCodes.length) {
+          await client.query(
+            `DELETE FROM legacy_ochanoko_products
+             WHERE title_key='onepiece' AND product_number IS NULL
+               AND lower(product_code)=ANY($1::text[])`,
+            [importedCodes],
+          );
+        }
         await client.query(
           `INSERT INTO legacy_ochanoko_products(title_key,product_number,product_code,product_name,category,subcategory,group_name,sale_price,initial_stock,publication_status,is_damaged,raw_data,source_file)
           SELECT 'onepiece',x.product_number,NULLIF(x.product_code,''),x.product_name,NULLIF(x.category,''),

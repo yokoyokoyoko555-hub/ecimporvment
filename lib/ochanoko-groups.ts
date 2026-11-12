@@ -1,5 +1,6 @@
 export const OCHANOKO_GROUP_OPTIONS = [
   "★SALE★",
+  "★SALE★SEC以下",
   "リーダーパラレル",
   "リーダー",
   "スーパーパラレル",
